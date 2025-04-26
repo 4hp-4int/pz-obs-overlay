@@ -111,7 +111,7 @@ function ZomboidEventMod.getPlayerStats(player)
     -- Get additional health-related stats
     local healthStats = {
         infectionLevel = bodyDamage:getInfectionLevel(),
-        painLevel = bodyDamage:getPainReduction(),
+        painLevel = player:getStats():getPain(),
         coldLevel = bodyDamage:getColdStrength(),
         wetness = bodyDamage:getWetness(),
         discomfortLevel = bodyDamage:getDiscomfortLevel(),

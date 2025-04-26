@@ -16,7 +16,27 @@
             <div class="health-bar">
                 <div class="health-bar-fill" id="health-bar"></div>
             </div>
-            <span id="health-text">100%</span>
+            <div class="health-details">
+                <div class="health-stat" id="infection-level">
+                    <span class="stat-label">Infection</span>
+                    <span class="stat-value">0%</span>
+                </div>
+                <div class="health-stat" id="pain-level">
+                    <span class="stat-label">Pain</span>
+                    <span class="stat-value">0%</span>
+                </div>
+                <div class="health-stat" id="body-parts">
+                    <span class="stat-label">Body Parts</span>
+                    <div class="body-parts-grid">
+                        <div class="body-part" id="head-health">Head: 100%</div>
+                        <div class="body-part" id="torso-health">Torso: 100%</div>
+                        <div class="body-part" id="left-arm-health">L Arm: 100%</div>
+                        <div class="body-part" id="right-arm-health">R Arm: 100%</div>
+                        <div class="body-part" id="left-leg-health">L Leg: 100%</div>
+                        <div class="body-part" id="right-leg-health">R Leg: 100%</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Top-right: Weight -->
@@ -216,7 +236,7 @@
 
         // UI update functions
         function updateState(player) {
-            // Update health
+            // Update overall health
             let healthPercent = player.health;
             if (healthPercent <= 1) {
                 healthPercent = Math.round(healthPercent * 100);
@@ -225,13 +245,9 @@
             }
 
             const healthBar = document.getElementById('health-bar');
-            const healthText = document.getElementById('health-text');
 
             // Update health bar width using transform for better performance
             healthBar.style.transform = `scaleX(${healthPercent / 100})`;
-
-            // Update health text
-            healthText.textContent = `${healthPercent}%`;
 
             // Handle low health animation
             if (healthPercent <= 25) {
@@ -250,6 +266,22 @@
 
             // Update current state
             currentState.health = healthPercent;
+
+            // Update health stats
+            if (player.healthStats) {
+                updateHealthStat('infection-level', player.healthStats.infectionLevel);
+                updateHealthStat('pain-level', player.healthStats.painLevel);
+            }
+
+            // Update body part health
+            if (player.bodyPartHealth) {
+                updateBodyPartHealth('head', player.bodyPartHealth.head);
+                updateBodyPartHealth('torso', player.bodyPartHealth.torso);
+                updateBodyPartHealth('left-arm', player.bodyPartHealth.leftArm);
+                updateBodyPartHealth('right-arm', player.bodyPartHealth.rightArm);
+                updateBodyPartHealth('left-leg', player.bodyPartHealth.leftLeg);
+                updateBodyPartHealth('right-leg', player.bodyPartHealth.rightLeg);
+            }
 
             // Update weight
             const weightPercent = (player.stats.inventoryWeight / player.stats.maxWeight) * 100;
@@ -271,6 +303,33 @@
             // Update weapons
             updateWeapon('primary', player.equipment.primaryHand);
             updateWeapon('secondary', player.equipment.secondaryHand);
+        }
+
+        // Helper function to update health stats
+        function updateHealthStat(statId, value) {
+            const element = document.getElementById(statId);
+            if (element) {
+                const valueElement = element.querySelector('.stat-value');
+                if (valueElement) {
+                    valueElement.textContent = `${Math.round(value)}%`;
+                }
+            }
+        }
+
+        // Helper function to update body part health
+        function updateBodyPartHealth(partId, value) {
+            const element = document.getElementById(`${partId}-health`);
+            if (element) {
+                const percent = Math.round(value);
+                element.textContent = `${partId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}: ${percent}%`;
+
+                // Add visual indicator for damaged body parts
+                if (percent < 50) {
+                    element.classList.add('damaged');
+                } else {
+                    element.classList.remove('damaged');
+                }
+            }
         }
 
         // Fallback mapping for weapon textures
