@@ -1,58 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { PlayerHUD } from './components/PlayerHUD';
+import React from 'react';
+import { StatsProvider, useStats } from './context/StatsContext';
+import { useWebSocket } from './hooks/useWebSocket';
+import { VitalsPanel } from './components/VitalsPanel';
+import { EnvironmentBadge } from './components/EnvironmentBadge';
+import { CoordsBox } from './components/CoordsBox';
+import './index.css';
 
-interface XPGainItem {
-    perk: string;
-    amount: number;
-    level?: number;
-}
-
-interface PlayerState {
-    health: number;
-    position: { x: number; y: number; z: number };
-    moodles: Record<string, number>;
-}
+const WS_URL = 'ws://localhost:8080';
 
 function App() {
-    const [xpGains, setXpGains] = useState<XPGainItem[]>([]);
-    const [playerData, setPlayerData] = useState<PlayerState>({
-        health: 1,
-        position: { x: 0, y: 0, z: 0 },
-        moodles: {}
+    const { updateStats } = useStats();
+
+    const { isConnected } = useWebSocket({
+        url: WS_URL,
+        onMessage: (data) => {
+            if (data.type === 'state' && data.player) {
+                updateStats(data.player);
+            }
+        }
     });
 
-    useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8080');
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'xp') {
-                setXpGains(prev => [...prev, {
-                    perk: data.skill,
-                    amount: data.amount,
-                    level: data.level
-                }]);
-
-                // Remove the XP gain notification after 3 seconds
-                setTimeout(() => {
-                    setXpGains(prev => prev.slice(1));
-                }, 3000);
-            } else if (data.type === 'state') {
-                setPlayerData(data.state);
-            }
-        };
-
-        return () => ws.close();
-    }, []);
-
     return (
-        <div className="fixed inset-0 pointer-events-none">
-            <div className="absolute top-4 right-4 w-64">
-                <PlayerHUD playerData={playerData} xpGains={xpGains} />
-            </div>
+        <div className="relative w-screen h-screen pointer-events-none select-none">
+            <VitalsPanel />
+            <EnvironmentBadge />
+            <CoordsBox />
+
+            {!isConnected && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg border border-red-500/20">
+                    <span className="text-sm text-red-500">Disconnected from server</span>
+                </div>
+            )}
         </div>
     );
 }
 
-export default App; 
+export default function AppWrapper() {
+    return (
+        <StatsProvider>
+            <App />
+        </StatsProvider>
+    );
+}

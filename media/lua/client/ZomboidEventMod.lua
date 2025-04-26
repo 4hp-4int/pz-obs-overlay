@@ -7,7 +7,7 @@ ZomboidEventMod = ZomboidEventMod or {}
 ZomboidEventMod.config = {
     EVENT_FILE = "events.json", -- File to write events to
     debug = true, -- Set to true to enable debug logging
-    stateUpdateInterval = 5000 -- Interval in ms to send state updates
+    stateUpdateInterval = 1000 -- Interval in ms to send state updates
 }
 
 ZomboidEventMod.eventData = nil -- Storage for event data
@@ -122,8 +122,14 @@ function ZomboidEventMod.getPlayerStats(player)
             numSurvivorsInVicinity = player:getNumSurvivorsInVicinity()
         },
         equipment = {
-            primaryHand = player:getPrimaryHandItem() and player:getPrimaryHandItem():getName() or nil,
-            secondaryHand = player:getSecondaryHandItem() and player:getSecondaryHandItem():getName() or nil
+            primaryHand = player:getPrimaryHandItem() and {
+                name = player:getPrimaryHandItem():getName(),
+                texture = player:getPrimaryHandItem():getTexture():getName()
+            } or nil,
+            secondaryHand = player:getSecondaryHandItem() and {
+                name = player:getSecondaryHandItem():getName(),
+                texture = player:getSecondaryHandItem():getTexture():getName()
+            } or nil
         }
     }
     
@@ -137,6 +143,7 @@ function ZomboidEventMod.onAddXP(player, perk, amount)
     ZomboidEventMod.eventData = {
         type = "xp_gain",
         perk = perk:getName(),
+        perkTexture = perk:getTexture() and perk:getTexture():getName() or nil,
         amount = amount,
         level = player:getPerkLevel(perk),
         player = ZomboidEventMod.getPlayerStats(player)
