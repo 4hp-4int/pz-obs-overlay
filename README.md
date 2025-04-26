@@ -41,16 +41,6 @@ Optional arguments:
 - `--port`: WebSocket server port (default: 8080)
 - `--log-level`: Logging level (default: INFO)
 
-### 3. Setup the Overlay
-
-```bash
-cd overlay
-npm install
-npm run dev
-```
-
-The overlay will be available at `http://localhost:5173`
-
 ## Configuration
 
 ### Event Daemon
