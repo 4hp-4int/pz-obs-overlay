@@ -10,6 +10,10 @@ This project consists of three main components:
 2. **Event Daemon** (`event_daemon.py`): A Python service that reads game events and broadcasts them via WebSocket
 3. **Transparent Overlay** (`overlay/`): A web-based overlay that displays Twitch chat messages in-game
 
+## Screenshot
+
+![Example Screenshot](example.png)
+
 ## Features
 
 - Real-time tracking of player stats and events
