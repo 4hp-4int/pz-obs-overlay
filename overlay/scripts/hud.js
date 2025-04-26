@@ -268,7 +268,7 @@ class UIManager {
             icon.style.backgroundPosition = '';
             icon.style.width = '';
             icon.style.height = '';
-            name.textContent = 'Empty';
+            name.textContent = '';
         }
     }
 
