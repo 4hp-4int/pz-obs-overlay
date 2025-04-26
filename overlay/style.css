@@ -1,0 +1,204 @@
+:root {
+    /* Colors */
+    --bg-color: rgba(0, 0, 0, 0.7);
+    --text-color: #ffffff;
+    --health-color: #ff4444;
+    --weight-color: #44ff44;
+    --border-color: rgba(255, 255, 255, 0.2);
+
+    /* Font */
+    --font-family: 'Segoe UI', Arial, sans-serif;
+    --font-size: 14px;
+
+    /* Spacing */
+    --spacing: 8px;
+    --border-radius: 4px;
+
+    /* Panel dimensions */
+    --panel-width: 200px;
+    --panel-height: 40px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    color: var(--text-color);
+    background: transparent;
+    overflow: hidden;
+}
+
+.hud-topleft {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+    z-index: 10;
+}
+
+.hud-topright {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+    z-index: 10;
+}
+
+.hud-bottomleft {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+    z-index: 10;
+}
+
+.hud-bottomright {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+    z-index: 10;
+}
+
+.hud-container {
+    display: none !important;
+}
+
+.panel {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing);
+    width: var(--panel-width);
+    height: var(--panel-height);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+}
+
+.health-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.health-bar-fill {
+    height: 100%;
+    background: var(--health-color);
+    transition: width 0.3s ease;
+}
+
+.weight-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.weight-bar-fill {
+    height: 100%;
+    background: var(--weight-color);
+    transition: width 0.3s ease;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-color);
+    padding: var(--spacing);
+    border-radius: var(--border-radius);
+    animation: toast 3s ease-out forwards;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+@keyframes toast {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -30%);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -70%);
+    }
+}
+
+/* State indicators */
+.state-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.state-indicator.inside {
+    background: #44ff44;
+}
+
+.state-indicator.outside {
+    background: #ff4444;
+}
+
+/* Weapon slots */
+.weapon-slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+    min-width: 150px;
+}
+
+.weapon-slot .icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    /* background-size: contain; */
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+.weapon-slot.empty .icon {
+    opacity: 0.5;
+}
+
+.weapon-slot span {
+    color: white;
+    font-size: 14px;
+    text-shadow: 1px 1px 2px black;
+}

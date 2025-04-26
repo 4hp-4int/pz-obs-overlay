@@ -1,13 +1,317 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Zomboid Stream HUD</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Top-left: Health -->
+    <div class="hud-topleft">
+        <div class="panel" id="health-panel">
+            <div class="health-bar">
+                <div class="health-bar-fill" id="health-bar"></div>
+            </div>
+            <span id="health-text">100%</span>
+        </div>
+    </div>
+    <!-- Top-right: Weight -->
+    <div class="hud-topright">
+        <div class="panel" id="weight-panel">
+            <span class="label">Weight</span>
+            <div class="weight-bar">
+                <div class="weight-bar-fill" id="weight-bar"></div>
+            </div>
+            <span id="weight-text">0.0/0.0</span>
+        </div>
+    </div>
+    <!-- Bottom-left: Weapons -->
+    <div class="hud-bottomleft">
+        <div class="panel" id="primary-weapon-panel">
+            <div class="weapon-slot" id="primary-weapon">
+                <div class="icon" id="primary-weapon-icon"></div>
+                <span id="primary-weapon-name">Empty</span>
+            </div>
+        </div>
+        <div class="panel" id="secondary-weapon-panel">
+            <div class="weapon-slot" id="secondary-weapon">
+                <div class="icon" id="secondary-weapon-icon"></div>
+                <span id="secondary-weapon-name">Empty</span>
+            </div>
+        </div>
+    </div>
+    <!-- Bottom-right: Location -->
+    <div class="hud-bottomright">
+        <div class="panel" id="location-panel">
+            <span class="state-indicator" id="location-indicator"></span>
+            <span id="location-text">Outside</span>
+        </div>
+    </div>
+
+    <script src="spriteData.js"></script>
+    <script type="module">
+        // Configuration object - easily customizable by streamers
+        const config = {
+            // WebSocket connection
+            wsUrl: 'ws://127.0.0.1:8080',
+            reconnectDelay: 1000,
+            maxReconnectDelay: 30000,
+
+            // UI settings
+            position: {
+                top: '20px',
+                right: '20px'
+            },
+
+            // Toast notification settings
+            toastDuration: 3000,
+
+            // Debug mode
+            debug: true,
+
+            // Icon settings
+            defaultIcon: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
+            spriteSheets: {
+                'ui': 'assets/ui.png',
+                'ui_stuff0': 'assets/UI/ui_stuff0.png',
+                'ninventory0': 'assets/ninventory0.png',
+                'ninventory1': 'assets/ninventory1.png',
+                'ninventory2': 'assets/ninventory2.png',
+                'thuztor1': 'assets/ThuztorInventory1.png',
+                'thuztor2': 'assets/ThuztorInventory2.png',
+                'farming': 'assets/itemThuztorFarming1.png'
+            }
+        };
+
+        // Simple sprite sheet manager
+        class SpriteSheetManager {
+            constructor() {
+                // Use the global SPRITE_DATA object
+                this.spriteData = window.SPRITE_DATA;
+            }
+
+            getSpriteStyle(textureName) {
+                if (!textureName) {
+                    return {};
+                }
+                const spriteData = this.spriteData[textureName];
+                if (!spriteData) {
+                    console.warn(`No sprite data found for: ${textureName}`);
+                    return {
+                        backgroundImage: `url(${config.spriteSheets['ui'] || config.defaultIcon})`,
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat'
+                    };
+                }
+
+                // Get the correct sprite sheet URL
+                const sheetUrl = config.spriteSheets[spriteData.sheet] || config.spriteSheets['ui'];
+                if (!sheetUrl) {
+                    console.warn(`No sprite sheet found for: ${spriteData.sheet}`);
+                    return {
+                        backgroundImage: `url(${config.defaultIcon})`,
+                        backgroundSize: 'contain',
+                        backgroundRepeat: 'no-repeat'
+                    };
+                }
+
+                return {
+                    backgroundImage: `url(${sheetUrl})`,
+                    backgroundPosition: `-${spriteData.x}px -${spriteData.y}px`,
+                    width: `${spriteData.width}px`,
+                    height: `${spriteData.height}px`,
+                    backgroundRepeat: 'no-repeat'
+                };
+            }
+        }
+
+        // Initialize sprite sheet manager
+        const spriteManager = new SpriteSheetManager();
+
+        // Helper function to handle icon loading errors
+        function handleIconError(img) {
+            img.src = config.defaultIcon;
+            img.alt = 'Missing icon';
+        }
+
+        // Current state
+        let currentState = {
+            health: 100,
+            weight: { current: 0, max: 0 },
+            location: 'outside',
+            weapons: {
+                primary: null,
+                secondary: null
+            }
+        };
+
+        // WebSocket connection
+        let ws = null;
+        let reconnectTimeout = null;
+        let currentReconnectDelay = config.reconnectDelay;
+
+        function connectWS() {
+            if (ws) {
+                ws.close();
+            }
+
+            ws = new WebSocket(config.wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                currentReconnectDelay = config.reconnectDelay;
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleEvent(data);
+                } catch (e) {
+                    console.error('Failed to parse WebSocket message:', e);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected, attempting to reconnect...');
+                reconnectTimeout = setTimeout(() => {
+                    currentReconnectDelay = Math.min(
+                        currentReconnectDelay * 2,
+                        config.maxReconnectDelay
+                    );
+                    connectWS();
+                }, currentReconnectDelay);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Event handling
+        function handleEvent(event) {
+            if (config.debug) {
+                console.debug('Received event:', event);
+            }
+
+            switch (event.type) {
+                case 'state':
+                    updateState(event.player);
+                    break;
+                case 'xp_gain':
+                    showToast(`+${event.amount} XP: ${event.perk}`, event.perkTexture);
+                    break;
+                case 'zombie_kill':
+                    showToast(`Zombie killed with ${event.weapon}`);
+                    break;
+                default:
+                    if (config.debug) {
+                        console.debug('Unknown event type:', event.type);
+                    }
+            }
+        }
+
+        // UI update functions
+        function updateState(player) {
+            // Update health
+            let healthPercent = player.health;
+            if (healthPercent <= 1) {
+                healthPercent = Math.round(healthPercent * 100);
+            } else {
+                healthPercent = Math.round(healthPercent);
+            }
+            document.getElementById('health-bar').style.width = `${healthPercent}%`;
+            document.getElementById('health-text').textContent = `${healthPercent}%`;
+
+            // Update weight
+            const weightPercent = (player.stats.inventoryWeight / player.stats.maxWeight) * 100;
+            document.getElementById('weight-bar').style.width = `${weightPercent}%`;
+            document.getElementById('weight-text').textContent =
+                `${player.stats.inventoryWeight.toFixed(1)}/${player.stats.maxWeight.toFixed(1)}`;
+
+            // Update location
+            const locationIndicator = document.getElementById('location-indicator');
+            const locationText = document.getElementById('location-text');
+            if (player.state.isOutside) {
+                locationIndicator.className = 'state-indicator outside';
+                locationText.textContent = 'Outside';
+            } else {
+                locationIndicator.className = 'state-indicator inside';
+                locationText.textContent = 'Inside';
+            }
+
+            // Update weapons
+            updateWeapon('primary', player.equipment.primaryHand);
+            updateWeapon('secondary', player.equipment.secondaryHand);
+        }
+
+        // Fallback mapping for weapon textures
+        const textureFallbacks = {
+            'Item_Crowbar_Forged': 'Item_Crowbar',
+            // Add more mappings as needed
+        };
+        function getWeaponTexture(texture) {
+            return textureFallbacks[texture] || texture;
+        }
+
+        function updateWeapon(slot, weapon) {
+            const container = document.getElementById(`${slot}-weapon`);
+            const icon = document.getElementById(`${slot}-weapon-icon`);
+            const name = document.getElementById(`${slot}-weapon-name`);
+
+            if (weapon) {
+                const resolvedTexture = getWeaponTexture(weapon.texture);
+                if (config.debug) {
+                    console.debug(`[${slot}] weapon.texture:`, weapon.texture, 'resolved to:', resolvedTexture);
+                }
+                container.classList.remove('empty');
+
+                // Use the correct sprite sheet and coordinates from UI.xml
+                const spriteStyle = spriteManager.getSpriteStyle(resolvedTexture);
+                Object.assign(icon.style, spriteStyle);
+
+                // Set the weapon name
+                name.textContent = weapon.name;
+            } else {
+                container.classList.add('empty');
+                icon.style.backgroundImage = '';
+                icon.style.backgroundPosition = '';
+                icon.style.width = '';
+                icon.style.height = '';
+                name.textContent = 'Empty';
+            }
+        }
+
+        function showToast(message, iconPath = null) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+
+            if (iconPath) {
+                const icon = document.createElement('img');
+                icon.className = 'icon';
+                icon.src = `assets/${iconPath}`;
+                toast.appendChild(icon);
+            }
+
+            const text = document.createElement('span');
+            text.textContent = message;
+            toast.appendChild(text);
+
+            document.body.appendChild(toast);
+
+            // Remove toast after animation
+            setTimeout(() => {
+                toast.remove();
+            }, config.toastDuration);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            connectWS();
+        });
+    </script>
+</body>
+
 </html>
