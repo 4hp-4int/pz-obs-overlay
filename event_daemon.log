@@ -1,0 +1,203 @@
+2025-04-25 19:05:14,352 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:05:14,352 - EventDaemon - INFO - Retrying in 1 seconds...
+2025-04-25 19:05:15,355 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:05:15,355 - EventDaemon - INFO - Retrying in 2 seconds...
+2025-04-25 19:05:17,358 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:05:17,358 - EventDaemon - INFO - Retrying in 4 seconds...
+2025-04-25 19:05:21,364 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:05:21,364 - EventDaemon - INFO - Retrying in 8 seconds...
+2025-04-25 19:05:24,589 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:08:30,133 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:08:30,133 - EventDaemon - INFO - Retrying in 1 seconds...
+2025-04-25 19:08:31,136 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:08:31,137 - EventDaemon - INFO - Retrying in 2 seconds...
+2025-04-25 19:08:34,202 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:10:10,252 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:10,252 - EventDaemon - INFO - Retrying in 1 seconds...
+2025-04-25 19:10:11,255 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:11,255 - EventDaemon - INFO - Retrying in 2 seconds...
+2025-04-25 19:10:14,472 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:14,472 - EventDaemon - INFO - Retrying in 4 seconds...
+2025-04-25 19:10:16,445 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:10:35,618 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:35,618 - EventDaemon - INFO - Retrying in 1 seconds...
+2025-04-25 19:10:36,620 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:36,621 - EventDaemon - INFO - Retrying in 2 seconds...
+2025-04-25 19:10:38,625 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:38,626 - EventDaemon - INFO - Retrying in 4 seconds...
+2025-04-25 19:10:42,629 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:42,629 - EventDaemon - INFO - Retrying in 8 seconds...
+2025-04-25 19:10:51,866 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:10:51,866 - EventDaemon - INFO - Retrying in 16 seconds...
+2025-04-25 19:11:07,880 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:11:07,880 - EventDaemon - INFO - Retrying in 32 seconds...
+2025-04-25 19:11:41,121 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:11:41,121 - EventDaemon - INFO - Retrying in 60 seconds...
+2025-04-25 19:11:49,678 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:12:26,551 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:12:26,551 - EventDaemon - INFO - Retrying in 1 seconds...
+2025-04-25 19:12:28,783 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:12:28,783 - EventDaemon - INFO - Retrying in 2 seconds...
+2025-04-25 19:12:30,788 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:12:30,788 - EventDaemon - INFO - Retrying in 4 seconds...
+2025-04-25 19:12:34,793 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:12:34,793 - EventDaemon - INFO - Retrying in 8 seconds...
+2025-04-25 19:12:42,796 - EventDaemon - ERROR - Connection error: [Errno 111] Connect call failed ('127.0.0.1', 8080)
+2025-04-25 19:12:42,796 - EventDaemon - INFO - Retrying in 16 seconds...
+2025-04-25 19:12:45,569 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:14:28,465 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:14:28,465 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:14:28,465 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:29,466 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:30,468 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:31,470 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:32,471 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:33,473 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:34,475 - EventDaemon - INFO - Waiting for Saves/events.json to be created...
+2025-04-25 19:14:35,134 - websockets.server - INFO - server closing
+2025-04-25 19:14:35,134 - websockets.server - INFO - server closed
+2025-04-25 19:14:35,136 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:14:54,851 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:14:54,852 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:14:54,852 - EventDaemon - INFO - Waiting for C:\Users\Khalen\Zomboid\Lua\Saves\events.json to be created...
+2025-04-25 19:14:55,853 - EventDaemon - INFO - Waiting for C:\Users\Khalen\Zomboid\Lua\Saves\events.json to be created...
+2025-04-25 19:14:56,854 - EventDaemon - INFO - Waiting for C:\Users\Khalen\Zomboid\Lua\Saves\events.json to be created...
+2025-04-25 19:14:57,164 - websockets.server - INFO - server closing
+2025-04-25 19:14:57,164 - websockets.server - INFO - server closed
+2025-04-25 19:14:57,166 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:15:13,721 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:15:13,721 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:15:13,721 - EventDaemon - INFO - Waiting for C:UsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:15:15,953 - EventDaemon - INFO - Waiting for C:UsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:15:16,954 - EventDaemon - INFO - Waiting for C:UsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:15:17,956 - EventDaemon - INFO - Waiting for C:UsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:15:18,633 - websockets.server - INFO - server closing
+2025-04-25 19:15:18,633 - websockets.server - INFO - server closed
+2025-04-25 19:15:18,635 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:15:22,823 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:15:22,824 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:15:22,824 - EventDaemon - INFO - Waiting for C:\Users\Khalen\Zomboid\Lua\Saves\events.json to be created...
+2025-04-25 19:15:23,824 - EventDaemon - INFO - Waiting for C:\Users\Khalen\Zomboid\Lua\Saves\events.json to be created...
+2025-04-25 19:15:24,826 - EventDaemon - INFO - Waiting for C:\Users\Khalen\Zomboid\Lua\Saves\events.json to be created...
+2025-04-25 19:15:25,096 - websockets.server - INFO - server closing
+2025-04-25 19:15:25,096 - websockets.server - INFO - server closed
+2025-04-25 19:15:25,097 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:16:52,962 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:16:52,962 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:16:52,963 - EventDaemon - INFO - Waiting for /mnt/cUsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:16:53,964 - EventDaemon - INFO - Waiting for /mnt/cUsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:16:56,289 - EventDaemon - INFO - Waiting for /mnt/cUsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:16:57,291 - EventDaemon - INFO - Waiting for /mnt/cUsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:16:58,292 - EventDaemon - INFO - Waiting for /mnt/cUsersKhalenZomboidLuaSavesevents.json to be created...
+2025-04-25 19:16:58,960 - websockets.server - INFO - server closing
+2025-04-25 19:16:58,961 - websockets.server - INFO - server closed
+2025-04-25 19:16:58,962 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:17:01,833 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:17:01,834 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:17:16,347 - websockets.server - INFO - connection open
+2025-04-25 19:17:16,348 - EventDaemon - INFO - Client connected. Total clients: 1
+2025-04-25 19:17:16,366 - websockets.server - INFO - connection open
+2025-04-25 19:17:16,367 - EventDaemon - INFO - Client connected. Total clients: 2
+2025-04-25 19:19:47,984 - EventDaemon - INFO - Client disconnected. Remaining clients: 1
+2025-04-25 19:19:47,985 - EventDaemon - INFO - Client disconnected. Remaining clients: 0
+2025-04-25 19:19:47,985 - websockets.server - INFO - connection closed
+2025-04-25 19:19:47,986 - websockets.server - INFO - connection closed
+2025-04-25 19:24:53,393 - websockets.server - INFO - connection open
+2025-04-25 19:24:53,393 - EventDaemon - INFO - Client connected. Total clients: 1
+2025-04-25 19:24:53,420 - websockets.server - INFO - connection open
+2025-04-25 19:24:53,420 - EventDaemon - INFO - Client connected. Total clients: 2
+2025-04-25 19:25:09,728 - EventDaemon - INFO - Client disconnected. Remaining clients: 1
+2025-04-25 19:25:09,737 - EventDaemon - INFO - Client disconnected. Remaining clients: 0
+2025-04-25 19:25:09,738 - websockets.server - INFO - connection closed
+2025-04-25 19:25:09,738 - websockets.server - INFO - connection closed
+2025-04-25 19:25:10,168 - websockets.server - INFO - connection open
+2025-04-25 19:25:10,168 - EventDaemon - INFO - Client connected. Total clients: 1
+2025-04-25 19:25:10,183 - websockets.server - INFO - connection open
+2025-04-25 19:25:10,183 - EventDaemon - INFO - Client connected. Total clients: 2
+2025-04-25 19:25:36,311 - websockets.server - INFO - server closing
+2025-04-25 19:25:36,313 - EventDaemon - INFO - Client disconnected. Remaining clients: 1
+2025-04-25 19:25:36,313 - EventDaemon - INFO - Client disconnected. Remaining clients: 0
+2025-04-25 19:25:36,313 - websockets.server - INFO - connection closed
+2025-04-25 19:25:36,313 - websockets.server - INFO - connection closed
+2025-04-25 19:25:36,313 - websockets.server - INFO - server closed
+2025-04-25 19:25:36,315 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:25:38,574 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:25:38,575 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:25:41,442 - websockets.server - INFO - connection open
+2025-04-25 19:25:41,442 - EventDaemon - INFO - Client connected. Total clients: 1
+2025-04-25 19:25:41,458 - websockets.server - INFO - connection open
+2025-04-25 19:25:41,459 - EventDaemon - INFO - Client connected. Total clients: 2
+2025-04-25 19:25:41,743 - websockets.server - INFO - connection open
+2025-04-25 19:25:41,743 - EventDaemon - INFO - Client connected. Total clients: 3
+2025-04-25 19:25:46,271 - EventDaemon - INFO - Client disconnected. Remaining clients: 2
+2025-04-25 19:25:46,271 - websockets.server - INFO - connection closed
+2025-04-25 19:25:46,563 - websockets.server - INFO - connection open
+2025-04-25 19:25:46,563 - EventDaemon - INFO - Client connected. Total clients: 3
+2025-04-25 19:25:46,567 - EventDaemon - INFO - Client disconnected. Remaining clients: 2
+2025-04-25 19:25:46,568 - websockets.server - INFO - connection closed
+2025-04-25 19:25:46,579 - websockets.server - INFO - connection open
+2025-04-25 19:25:46,579 - EventDaemon - INFO - Client connected. Total clients: 3
+2025-04-25 19:25:46,864 - websockets.server - INFO - connection open
+2025-04-25 19:25:46,864 - EventDaemon - INFO - Client connected. Total clients: 4
+2025-04-25 19:25:51,392 - websockets.server - INFO - connection open
+2025-04-25 19:25:51,393 - EventDaemon - INFO - Client connected. Total clients: 5
+2025-04-25 19:25:51,393 - EventDaemon - INFO - Client disconnected. Remaining clients: 4
+2025-04-25 19:25:51,393 - websockets.server - INFO - connection closed
+2025-04-25 19:25:51,407 - websockets.server - INFO - connection open
+2025-04-25 19:25:51,407 - EventDaemon - INFO - Client connected. Total clients: 5
+2025-04-25 19:25:52,952 - websockets.server - INFO - connection open
+2025-04-25 19:25:52,953 - EventDaemon - INFO - Client connected. Total clients: 6
+2025-04-25 19:25:52,973 - websockets.server - INFO - connection open
+2025-04-25 19:25:52,973 - EventDaemon - INFO - Client connected. Total clients: 7
+2025-04-25 19:25:57,767 - websockets.server - INFO - connection open
+2025-04-25 19:25:57,768 - EventDaemon - INFO - Client connected. Total clients: 8
+2025-04-25 19:25:57,797 - websockets.server - INFO - connection open
+2025-04-25 19:25:57,798 - EventDaemon - INFO - Client connected. Total clients: 9
+2025-04-25 19:25:58,067 - websockets.server - INFO - connection open
+2025-04-25 19:25:58,067 - EventDaemon - INFO - Client connected. Total clients: 10
+2025-04-25 19:25:58,525 - EventDaemon - INFO - Client disconnected. Remaining clients: 9
+2025-04-25 19:25:58,526 - EventDaemon - INFO - Client disconnected. Remaining clients: 8
+2025-04-25 19:25:58,526 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,526 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,528 - EventDaemon - INFO - Client disconnected. Remaining clients: 7
+2025-04-25 19:25:58,529 - EventDaemon - INFO - Client disconnected. Remaining clients: 6
+2025-04-25 19:25:58,529 - EventDaemon - INFO - Client disconnected. Remaining clients: 5
+2025-04-25 19:25:58,529 - EventDaemon - INFO - Client disconnected. Remaining clients: 4
+2025-04-25 19:25:58,529 - EventDaemon - INFO - Client disconnected. Remaining clients: 3
+2025-04-25 19:25:58,530 - EventDaemon - INFO - Client disconnected. Remaining clients: 2
+2025-04-25 19:25:58,530 - EventDaemon - INFO - Client disconnected. Remaining clients: 1
+2025-04-25 19:25:58,530 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - websockets.server - INFO - connection closed
+2025-04-25 19:25:58,531 - EventDaemon - INFO - Client disconnected. Remaining clients: 0
+2025-04-25 19:25:58,532 - websockets.server - INFO - connection closed
+2025-04-25 19:26:00,487 - websockets.server - INFO - server closing
+2025-04-25 19:26:00,487 - websockets.server - INFO - server closed
+2025-04-25 19:26:00,489 - EventDaemon - INFO - Shutting down daemon...
+2025-04-25 19:26:01,701 - websockets.server - INFO - server listening on 127.0.0.1:8080
+2025-04-25 19:26:01,701 - EventDaemon - INFO - WebSocket server started on ws://localhost:8080
+2025-04-25 19:26:08,152 - websockets.server - INFO - connection open
+2025-04-25 19:26:08,152 - EventDaemon - INFO - Client connected. Total clients: 1
+2025-04-25 19:26:08,178 - websockets.server - INFO - connection open
+2025-04-25 19:26:08,178 - EventDaemon - INFO - Client connected. Total clients: 2
+2025-04-25 19:26:41,836 - websockets.server - INFO - connection rejected (426 Upgrade Required)
+2025-04-25 19:26:41,836 - websockets.server - INFO - connection closed
+2025-04-25 19:26:41,941 - websockets.server - INFO - connection rejected (426 Upgrade Required)
+2025-04-25 19:26:41,942 - websockets.server - INFO - connection closed
+2025-04-25 19:26:51,848 - websockets.server - INFO - connection closed
+2025-04-25 19:27:15,610 - EventDaemon - INFO - Events file was truncated or recreated
+2025-04-25 19:28:25,171 - EventDaemon - INFO - Client disconnected. Remaining clients: 1
+2025-04-25 19:28:25,171 - websockets.server - INFO - connection closed
+2025-04-25 19:28:25,172 - EventDaemon - INFO - Client disconnected. Remaining clients: 0
+2025-04-25 19:28:25,172 - websockets.server - INFO - connection closed
+2025-04-25 19:35:26,897 - websockets.server - INFO - connection open
+2025-04-25 19:35:26,898 - EventDaemon - INFO - Client connected. Total clients: 1
+2025-04-25 19:37:16,304 - EventDaemon - INFO - Client disconnected. Remaining clients: 0
+2025-04-25 19:37:16,305 - websockets.server - INFO - connection closed
+2025-04-25 19:37:19,211 - websockets.server - INFO - server closing
+2025-04-25 19:37:19,212 - websockets.server - INFO - server closed
+2025-04-25 19:37:19,216 - EventDaemon - INFO - Shutting down daemon...

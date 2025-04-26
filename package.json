@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "npm": "^11.3.0",
+    "package": "^1.0.1",
+    "package.json": "^2.0.1"
+  }
+}
