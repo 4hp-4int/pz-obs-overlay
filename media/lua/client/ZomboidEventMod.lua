@@ -94,8 +94,39 @@ end
 function ZomboidEventMod.getPlayerStats(player)
     if not player then return nil end
     
+    local bodyDamage = player:getBodyDamage()
+    if not bodyDamage then return nil end
+    
+    -- Get overall health and body part health
+    local overallHealth = bodyDamage:getHealth()
+    local bodyPartHealth = {
+        head = bodyDamage:getBodyPartHealth(BodyPartType.Head),
+        torso = bodyDamage:getBodyPartHealth(BodyPartType.Torso_Upper),
+        leftArm = bodyDamage:getBodyPartHealth(BodyPartType.Arm_L),
+        rightArm = bodyDamage:getBodyPartHealth(BodyPartType.Arm_R),
+        leftLeg = bodyDamage:getBodyPartHealth(BodyPartType.Leg_L),
+        rightLeg = bodyDamage:getBodyPartHealth(BodyPartType.Leg_R)
+    }
+    
+    -- Get additional health-related stats
+    local healthStats = {
+        infectionLevel = bodyDamage:getInfectionLevel(),
+        painLevel = bodyDamage:getPainReduction(),
+        coldLevel = bodyDamage:getColdStrength(),
+        wetness = bodyDamage:getWetness(),
+        discomfortLevel = bodyDamage:getDiscomfortLevel(),
+        foodSicknessLevel = bodyDamage:getFoodSicknessLevel(),
+        poisonLevel = bodyDamage:getPoisonLevel()
+    }
+    
+    print("[DEBUG] Health Stats - Overall: " .. overallHealth .. 
+          ", Infection: " .. healthStats.infectionLevel .. 
+          ", Pain: " .. healthStats.painLevel)
+    
     local stats = {
-        health = player:getHealth(),
+        health = overallHealth,
+        bodyPartHealth = bodyPartHealth,
+        healthStats = healthStats,
         position = {
             x = player:getX(),
             y = player:getY(),
