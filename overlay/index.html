@@ -11,7 +11,8 @@
 <body>
     <!-- Top-left: Health -->
     <div class="hud-topleft">
-        <div class="panel" id="health-panel">
+        <div class="panel health-panel" id="health-panel">
+            <div class="health-icon"></div>
             <div class="health-bar">
                 <div class="health-bar-fill" id="health-bar"></div>
             </div>
@@ -222,8 +223,33 @@
             } else {
                 healthPercent = Math.round(healthPercent);
             }
-            document.getElementById('health-bar').style.width = `${healthPercent}%`;
-            document.getElementById('health-text').textContent = `${healthPercent}%`;
+
+            const healthBar = document.getElementById('health-bar');
+            const healthText = document.getElementById('health-text');
+
+            // Update health bar width using transform for better performance
+            healthBar.style.transform = `scaleX(${healthPercent / 100})`;
+
+            // Update health text
+            healthText.textContent = `${healthPercent}%`;
+
+            // Handle low health animation
+            if (healthPercent <= 25) {
+                healthBar.classList.add('low-health');
+            } else {
+                healthBar.classList.remove('low-health');
+            }
+
+            // Handle damage taken animation
+            if (currentState.health > healthPercent) {
+                healthBar.classList.add('damage-taken');
+                setTimeout(() => {
+                    healthBar.classList.remove('damage-taken');
+                }, 300);
+            }
+
+            // Update current state
+            currentState.health = healthPercent;
 
             // Update weight
             const weightPercent = (player.stats.inventoryWeight / player.stats.maxWeight) * 100;

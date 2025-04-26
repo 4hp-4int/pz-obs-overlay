@@ -6,6 +6,23 @@
     --weight-color: #44ff44;
     --border-color: rgba(255, 255, 255, 0.2);
 
+    /* Health Bar Colors */
+    --health-bar-high: #4CAF50;
+    --health-bar-medium: #FFC107;
+    --health-bar-low: #F44336;
+    --health-bar-bg: rgba(255, 255, 255, 0.1);
+    --health-bar-glow: rgba(255, 0, 0, 0.3);
+
+    /* Health Bar Dimensions */
+    --health-bar-height: 12px;
+    --health-bar-width: 150px;
+    --health-bar-border-radius: 6px;
+
+    /* Animations */
+    --pulse-duration: 1.5s;
+    --flash-duration: 0.3s;
+    --transition-duration: 0.3s;
+
     /* Font */
     --font-family: 'Segoe UI', Arial, sans-serif;
     --font-size: 14px;
@@ -90,16 +107,61 @@ body {
 }
 
 .health-bar {
-    height: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: var(--border-radius);
+    position: relative;
+    height: var(--health-bar-height);
+    width: var(--health-bar-width);
+    background: var(--health-bar-bg);
+    border-radius: var(--health-bar-border-radius);
     overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
 .health-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 100%;
-    background: var(--health-color);
-    transition: width 0.3s ease;
+    width: 100%;
+    background: linear-gradient(90deg, var(--health-bar-high), var(--health-bar-medium), var(--health-bar-low));
+    transform-origin: left;
+    transition: transform var(--transition-duration) ease-out;
+}
+
+.health-bar-fill.low-health {
+    animation: pulse var(--pulse-duration) infinite;
+}
+
+.health-bar-fill.damage-taken {
+    animation: flash var(--flash-duration);
+}
+
+.health-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.1) 100%);
+    pointer-events: none;
+}
+
+.health-panel {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+}
+
+.health-icon {
+    width: 20px;
+    height: 20px;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff4444"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 2px rgba(255, 0, 0, 0.5));
 }
 
 .weight-bar {
@@ -201,4 +263,32 @@ body {
     color: white;
     font-size: 14px;
     text-shadow: 1px 1px 2px black;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 var(--health-bar-glow);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
