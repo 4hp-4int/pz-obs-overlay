@@ -7,7 +7,8 @@ ZomboidEventMod = ZomboidEventMod or {}
 ZomboidEventMod.config = {
     EVENT_FILE = "events.json", -- File to write events to
     debug = true, -- Set to true to enable debug logging
-    playerStatsInterval = 10000 -- Interval in ms to send player stats
+    playerStatsInterval = 10000, -- Interval in ms to send player stats
+    stateUpdateInterval = 5000 -- Interval in ms to send state updates
 }
 
 ZomboidEventMod.eventData = nil -- Storage for event data
@@ -61,7 +62,7 @@ function ZomboidEventMod.initializeWriter()
     ZomboidEventMod.eventFilePath = saveFolder .. "/" .. ZomboidEventMod.config.EVENT_FILE
     
     -- Create/clear the file
-    local writer = getFileWriter(ZomboidEventMod.eventFilePath, true, false) -- true = append, false = no create directories
+    local writer = getFileWriter(ZomboidEventMod.eventFilePath, true, true) 
     if writer then
         writer:close() -- Just create/clear the file
     end
@@ -303,32 +304,38 @@ local function updatePlayerState()
     local player = getPlayer()
     if not player then return end
     
-    -- Get basic player state
-    ZomboidEventMod.eventData = {
-        type = "state",
-        health = player:getBodyDamage():getOverallBodyHealth(),
-        position = {
-            x = player:getX(),
-            y = player:getY(),
-            z = player:getZ()
-        },
-        stats = {
-            isAsleep = player:isAsleep(),
-            isResting = player:isResting(),
-            isOutside = player:isOutside(),
-            hoursSurvived = player:getHoursSurvived(),
-            zombieKills = player:getZombieKills(),
-            inventoryWeight = player:getInventoryWeight(),
-            maxWeight = player:getMaxWeight()
-        },
-        equipment = {
-            primaryHand = player:getPrimaryHandItem() and player:getPrimaryHandItem():getName() or nil,
-            secondaryHand = player:getSecondaryHandItem() and player:getSecondaryHandItem():getName() or nil
+    -- Rate limit state updates
+    if not ZomboidEventMod.lastStateUpdate or 
+       (getTimeInMillis() - ZomboidEventMod.lastStateUpdate) >= ZomboidEventMod.config.stateUpdateInterval then
+        
+        -- Get basic player state
+        ZomboidEventMod.eventData = {
+            type = "state",
+            health = player:getBodyDamage():getOverallBodyHealth(),
+            position = {
+                x = player:getX(),
+                y = player:getY(),
+                z = player:getZ()
+            },
+            stats = {
+                isAsleep = player:isAsleep(),
+                isResting = player:isResting(),
+                isOutside = player:isOutside(),
+                hoursSurvived = player:getHoursSurvived(),
+                zombieKills = player:getZombieKills(),
+                inventoryWeight = player:getInventoryWeight(),
+                maxWeight = player:getMaxWeight()
+            },
+            equipment = {
+                primaryHand = player:getPrimaryHandItem() and player:getPrimaryHandItem():getName() or nil,
+                secondaryHand = player:getSecondaryHandItem() and player:getSecondaryHandItem():getName() or nil
+            }
         }
-    }
-    
-    -- Send state update
-    ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
+        
+        -- Send state update
+        ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
+        ZomboidEventMod.lastStateUpdate = getTimeInMillis()
+    end
 end
 
 local function onXPGain(skill, amount, level)
