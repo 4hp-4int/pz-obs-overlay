@@ -1,17 +1,19 @@
 :root {
     /* Colors */
-    --bg-color: rgba(0, 0, 0, 0.7);
+    --bg-color: rgba(12, 10, 26, 0.85);
     --text-color: #ffffff;
-    --health-color: #ff4444;
-    --weight-color: #44ff44;
-    --border-color: rgba(255, 255, 255, 0.2);
+    --accent-teal: #4deeea;
+    --accent-pink: #ff6ec7;
+    --accent-blue: #74ee15;
+    --border-color: rgba(77, 238, 234, 0.3);
+    --panel-glow: 0 0 15px rgba(77, 238, 234, 0.2);
 
     /* Health Bar Colors */
-    --health-bar-high: #4CAF50;
-    --health-bar-medium: #FFC107;
-    --health-bar-low: #F44336;
+    --health-bar-high: #4deeea;
+    --health-bar-medium: #ff6ec7;
+    --health-bar-low: #f44336;
     --health-bar-bg: rgba(255, 255, 255, 0.1);
-    --health-bar-glow: rgba(255, 0, 0, 0.3);
+    --health-bar-glow: rgba(77, 238, 234, 0.3);
 
     /* Health Bar Dimensions */
     --health-bar-height: 12px;
@@ -24,12 +26,12 @@
     --transition-duration: 0.3s;
 
     /* Font */
-    --font-family: 'Segoe UI', Arial, sans-serif;
+    --font-family: 'Space Grotesk', 'IBM Plex Mono', monospace;
     --font-size: 14px;
 
     /* Spacing */
     --spacing: 8px;
-    --border-radius: 4px;
+    --border-radius: 8px;
 
     /* Panel dimensions */
     --panel-width: 200px;
@@ -50,44 +52,63 @@ body {
     overflow: hidden;
 }
 
-.hud-topleft {
+/* Grid background effect */
+body::before {
+    content: '';
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(rgba(77, 238, 234, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(77, 238, 234, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    opacity: 0.1;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 20px 20px;
+    }
+}
+
+.hud-topleft,
+.hud-topright,
+.hud-bottomleft,
+.hud-bottomright {
+    position: fixed;
     display: flex;
     flex-direction: column;
     gap: var(--spacing);
     z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.hud-topleft {
+    top: 20px;
+    left: 20px;
 }
 
 .hud-topright {
-    position: fixed;
     top: 20px;
     right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing);
-    z-index: 10;
 }
 
 .hud-bottomleft {
-    position: fixed;
     bottom: 20px;
     left: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing);
-    z-index: 10;
 }
 
 .hud-bottomright {
-    position: fixed;
     bottom: 20px;
     right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing);
-    z-index: 10;
 }
 
 .hud-container {
@@ -104,6 +125,13 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing);
+    box-shadow: var(--panel-glow);
+    transition: all var(--transition-duration) ease;
+}
+
+.panel:hover {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 20px rgba(77, 238, 234, 0.3);
 }
 
 .health-bar {
@@ -113,7 +141,7 @@ body {
     background: var(--health-bar-bg);
     border-radius: var(--health-bar-border-radius);
     overflow: hidden;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px rgba(77, 238, 234, 0.2);
 }
 
 .health-bar-fill {
@@ -122,31 +150,35 @@ body {
     left: 0;
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, var(--health-bar-high), var(--health-bar-medium), var(--health-bar-low));
+    background: linear-gradient(90deg,
+            var(--health-bar-high) 0%,
+            var(--health-bar-medium) 50%,
+            var(--health-bar-low) 100%);
     transform-origin: left;
     transition: transform var(--transition-duration) ease-out;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .health-bar-fill.low-health {
-    animation: pulse var(--pulse-duration) infinite;
+    animation: pulse var(--pulse-duration) infinite, gradientShift 3s ease-in-out infinite;
 }
 
 .health-bar-fill.damage-taken {
     animation: flash var(--flash-duration);
-}
-
-.health-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0.1) 100%);
-    pointer-events: none;
 }
 
 .health-panel {
@@ -160,28 +192,7 @@ body {
     color: var(--text-color);
     display: flex;
     flex-direction: column;
-}
-
-/* .health-icon {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff4444"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
-    background-size: contain;
-    background-repeat: no-repeat;
-    filter: drop-shadow(0 0 2px rgba(255, 0, 0, 0.5));
-} */
-
-.health-bar {
-    width: 100%;
-    height: var(--health-bar-height);
-    background: var(--health-bar-bg);
-    border-radius: var(--health-bar-border-radius);
-    overflow: hidden;
-    margin: 5px 0;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-glow);
 }
 
 .health-details {
@@ -196,9 +207,14 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--border-radius);
     font-size: 11px;
+    transition: all var(--transition-duration) ease;
+}
+
+.health-stat:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .health-stat .stat-label {
@@ -218,16 +234,20 @@ body {
 
 .body-part {
     padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--border-radius);
     font-size: 11px;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all var(--transition-duration) ease;
+}
+
+.body-part:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .body-part.damaged {
-    background: rgba(255, 0, 0, 0.3);
-    color: #ff6b6b;
+    background: rgba(255, 0, 0, 0.2);
+    color: var(--accent-pink);
     animation: pulse 1s infinite;
 }
 
@@ -240,40 +260,19 @@ body {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.health-bar-fill {
-    width: 100%;
-    height: 100%;
-    background: #4CAF50;
-    transform-origin: left;
-    transition: transform 0.3s ease;
-}
-
-.health-bar-fill.low-health {
-    background: #f44336;
-    animation: pulse 1s infinite;
-}
-
-.health-bar-fill.damage-taken {
-    background: #ff6b6b;
-}
-
-.health-panel {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing);
-}
-
 .weight-bar {
     height: 8px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: var(--border-radius);
     overflow: hidden;
+    box-shadow: 0 0 10px rgba(77, 238, 234, 0.2);
 }
 
 .weight-bar-fill {
     height: 100%;
-    background: var(--weight-color);
-    transition: width 0.3s ease;
+    background: var(--accent-teal);
+    transition: width var(--transition-duration) ease;
+    animation: gradientShift 3s ease-in-out infinite;
 }
 
 .icon {
@@ -282,38 +281,53 @@ body {
     object-fit: contain;
 }
 
-.toast {
+#toast-container {
     position: fixed;
-    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg-color);
-    padding: var(--spacing);
-    border-radius: var(--border-radius);
-    animation: toast 3s ease-out forwards;
-    pointer-events: none;
+    bottom: 40px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     z-index: 1000;
+    pointer-events: none;
 }
 
-@keyframes toast {
-    0% {
+.toast {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.xp-toast {
+    background-color: rgba(0, 100, 0, 0.8);
+    border-left: 4px solid #4CAF50;
+}
+
+.level-up-toast {
+    background-color: rgba(0, 0, 100, 0.8);
+    border-left: 4px solid #2196F3;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
         opacity: 0;
-        transform: translate(-50%, -30%);
     }
 
-    10% {
+    to {
+        transform: translateX(0);
         opacity: 1;
-        transform: translate(-50%, -50%);
-    }
-
-    90% {
-        opacity: 1;
-        transform: translate(-50%, -50%);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -70%);
     }
 }
 
@@ -324,14 +338,15 @@ body {
     height: 8px;
     border-radius: 50%;
     margin-right: 4px;
+    box-shadow: 0 0 5px currentColor;
 }
 
 .state-indicator.inside {
-    background: #44ff44;
+    background: var(--accent-teal);
 }
 
 .state-indicator.outside {
-    background: #ff4444;
+    background: var(--accent-pink);
 }
 
 /* Weapon slots */
@@ -340,18 +355,26 @@ body {
     align-items: center;
     gap: 8px;
     padding: 4px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius);
     min-width: 150px;
+    transition: all var(--transition-duration) ease;
+}
+
+.weapon-slot:hover {
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .weapon-slot .icon {
     width: 32px;
     height: 32px;
     object-fit: contain;
-    /* background-size: contain; */
-    background-repeat: no-repeat;
     image-rendering: pixelated;
+    transition: all var(--transition-duration) ease;
+}
+
+.weapon-slot:hover .icon {
+    filter: brightness(1.2);
 }
 
 .weapon-slot.empty .icon {
@@ -361,7 +384,7 @@ body {
 .weapon-slot span {
     color: white;
     font-size: 14px;
-    text-shadow: 1px 1px 2px black;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes pulse {
@@ -370,11 +393,11 @@ body {
     }
 
     70% {
-        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+        box-shadow: 0 0 0 10px rgba(77, 238, 234, 0);
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+        box-shadow: 0 0 0 0 rgba(77, 238, 234, 0);
     }
 }
 

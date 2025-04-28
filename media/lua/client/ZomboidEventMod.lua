@@ -7,10 +7,16 @@ ZomboidEventMod = ZomboidEventMod or {}
 ZomboidEventMod.config = {
     EVENT_FILE = "events.json", -- File to write events to
     debug = true, -- Set to true to enable debug logging
-    stateUpdateInterval = 1000 -- Interval in ms to send state updates
+    stateUpdateInterval = 1000, -- Interval in ms to send state updates
+    minXpForToast = 1, -- Minimum XP to show toast
+    frequentPerks = { -- Perks that gain XP frequently
+        "Fitness",
+        "Strength"
+    }
 }
 
 ZomboidEventMod.eventData = nil -- Storage for event data
+ZomboidEventMod.perkLevels = {} -- Track previous perk levels
 
 -- Simple JSON encoder
 function ZomboidEventMod.toJSON(data)
@@ -64,6 +70,39 @@ function ZomboidEventMod.initializeWriter()
     local writer = getFileWriter(ZomboidEventMod.eventFilePath, true, true)
     if writer then
         writer:close() -- Just create/clear the file
+    end
+end
+
+-- Initialize perk levels for the player
+function ZomboidEventMod.initializePerkLevels()
+    local player = getPlayer()
+    if not player then return end
+    
+    ZomboidEventMod.perkLevels = {}
+    
+    -- Get all available perks from PerkFactory
+    local perks = PerkFactory.PerkList
+    if ZomboidEventMod.config.debug then
+        print("[ZomboidEventMod] Initializing perk levels...")
+    end
+    
+    -- Iterate over all perks
+    for i=0, perks:size()-1 do
+        local perk = perks:get(i)
+        if perk then
+            local perkName = PerkFactory.getPerkName(perk)
+            local level = player:getPerkLevel(perk)
+            
+            if ZomboidEventMod.config.debug then
+                print(string.format("  %s: Level %d", perkName, level))
+            end
+            
+            ZomboidEventMod.perkLevels[perkName] = level
+        end
+    end
+    
+    if ZomboidEventMod.config.debug then
+        print("[ZomboidEventMod] Perk levels initialized")
     end
 end
 
@@ -171,15 +210,43 @@ end
 function ZomboidEventMod.onAddXP(player, perk, amount)
     if not player or not perk then return end
     
-    ZomboidEventMod.eventData = {
-        type = "xp_gain",
-        perk = perk:getName(),
-        perkTexture = perk:getTexture() and perk:getTexture():getName() or nil,
-        amount = amount,
-        level = player:getPerkLevel(perk),
-        player = ZomboidEventMod.getPlayerStats(player)
-    }
-    ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
+    local perkName = perk:getName()
+    local currentLevel = player:getPerkLevel(perk)
+    local previousLevel = ZomboidEventMod.perkLevels[perkName] or 0
+    
+    -- Check if this is a level up
+    if currentLevel > previousLevel then
+        ZomboidEventMod.eventData = {
+            type = "level_up",
+            perk = perkName,
+            level = currentLevel,
+            player = ZomboidEventMod.getPlayerStats(player)
+        }
+        ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
+    end
+    
+    -- Only send XP gain for non-frequent perks or significant gains
+    local isFrequentPerk = false
+    for _, frequentPerk in ipairs(ZomboidEventMod.config.frequentPerks) do
+        if perkName == frequentPerk then
+            isFrequentPerk = true
+            break
+        end
+    end
+    
+    if not isFrequentPerk or amount >= 5 then
+        ZomboidEventMod.eventData = {
+            type = "xp_gain",
+            perk = perkName,
+            amount = amount,
+            level = currentLevel,
+            player = ZomboidEventMod.getPlayerStats(player)
+        }
+        ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
+    end
+    
+    -- Update tracked level
+    ZomboidEventMod.perkLevels[perkName] = currentLevel
 end
 
 function ZomboidEventMod.onZombieDead(zombie)
@@ -187,9 +254,12 @@ function ZomboidEventMod.onZombieDead(zombie)
     local player = getPlayer()
     if not player then return end
     
+    local weapon = player:getPrimaryHandItem() and player:getPrimaryHandItem():getName() or "none"
+    local weaponTexture = player:getPrimaryHandItem() and player:getPrimaryHandItem():getTexture():getName() or "none"
     ZomboidEventMod.eventData = {
         type = "zombie_kill",
-        weapon = player:getPrimaryHandItem() and player:getPrimaryHandItem():getName() or "none",
+        weapon = weapon,
+        weaponTexture = weaponTexture,
         location = { x = zombie:getX(), y = zombie:getY(), z = zombie:getZ() }
     }
     ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
@@ -246,6 +316,7 @@ function ZomboidEventMod.onGameStart()
     end
     ZomboidEventMod.initializeEvents()
     ZomboidEventMod.initializeWriter()
+    ZomboidEventMod.initializePerkLevels()
 end
 
 -- Register core game events

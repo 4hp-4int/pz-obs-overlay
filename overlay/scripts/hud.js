@@ -140,6 +140,9 @@ class UIManager {
     constructor() {
         this.spriteManager = new SpriteManager();
         this.initializeElements();
+        this.toastQueue = [];
+        this.activeToasts = 0;
+        this.maxToasts = 3;
     }
 
     initializeElements() {
@@ -272,14 +275,32 @@ class UIManager {
         }
     }
 
-    showToast(message, iconPath = null) {
+    showToast(message, iconPath = null, toastClass = '') {
+        // If too many toasts, queue it
+        if (this.activeToasts >= this.maxToasts) {
+            this.toastQueue.push([message, iconPath]);
+            return;
+        }
+        this.activeToasts++;
         const toast = document.createElement('div');
-        toast.className = 'toast';
+        toast.className = `toast ${toastClass}`;
 
         if (iconPath) {
-            const icon = document.createElement('img');
+            const icon = document.createElement('div');
             icon.className = 'icon';
-            icon.src = `assets/${iconPath}`;
+
+            // Special case: when killing zombies with bare hands, show a fist emoji
+            if (iconPath === 'none') {
+                icon.textContent = '👊';
+                icon.style.fontSize = '24px';
+                icon.style.lineHeight = '24px';
+                icon.style.textAlign = 'center';
+            } else {
+                const resolvedTexture = this.spriteManager.getWeaponTexture(iconPath);
+                const spriteStyle = this.spriteManager.getSpriteStyle(resolvedTexture);
+                Object.assign(icon.style, spriteStyle);
+            }
+
             toast.appendChild(icon);
         }
 
@@ -287,10 +308,21 @@ class UIManager {
         text.textContent = message;
         toast.appendChild(text);
 
-        document.body.appendChild(toast);
+        const container = document.getElementById('toast-container');
+        if (container) {
+            container.appendChild(toast);
+        } else {
+            document.body.appendChild(toast);
+        }
 
         setTimeout(() => {
             toast.remove();
+            this.activeToasts--;
+            // Show next toast in queue if any
+            if (this.toastQueue.length > 0) {
+                const [nextMsg, nextIcon] = this.toastQueue.shift();
+                this.showToast(nextMsg, nextIcon);
+            }
         }, config.toastDuration);
     }
 }
@@ -386,10 +418,16 @@ class HUD {
                 this.handleStateUpdate(event.player);
                 break;
             case 'xp_gain':
-                this.uiManager.showToast(`+${event.amount} XP: ${event.perk}`, event.perkTexture);
+                if (event.amount >= 1) {
+                    this.uiManager.showToast(`+${event.amount} XP: ${event.perk}`, null, 'xp-toast');
+                }
+                break;
+            case 'level_up':
+                this.uiManager.showToast(`Level Up! ${event.perk} Level ${event.level}`, null, 'level-up-toast');
                 break;
             case 'zombie_kill':
-                this.uiManager.showToast(`Zombie killed with ${event.weapon}`);
+                const weaponText = event.weapon === 'none' ? 'bare hands' : event.weapon;
+                this.uiManager.showToast(`Zombie killed with ${weaponText}`, event.weaponTexture);
                 break;
             default:
                 if (config.debug) {
