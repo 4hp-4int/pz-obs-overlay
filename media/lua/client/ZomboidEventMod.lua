@@ -1,25 +1,35 @@
 -- ZomboidEventMod.lua
+-- This mod integrates Project Zomboid gameplay events with a Twitch overlay system
+-- It tracks player stats, events, and sends them to a JSON file for the overlay to read
+
 require "ISUI/ISUIElement"
 
 ZomboidEventMod = ZomboidEventMod or {}
 
--- Configuration
+-- Configuration settings for the mod
+-- EVENT_FILE: Where to write the events JSON
+-- debug: Enable/disable debug logging
+-- stateUpdateInterval: How often to send player state updates (in milliseconds)
+-- minXpForToast: Minimum XP gain to show a toast notification
+-- didFaceCapture: Tracks if we've captured the player's face screenshot
+-- frequentPerks: List of perks that gain XP frequently to avoid spam
 ZomboidEventMod.config = {
-    EVENT_FILE = "events.json", -- File to write events to
-    debug = true, -- Set to true to enable debug logging
-    stateUpdateInterval = 1000, -- Interval in ms to send state updates
-    minXpForToast = 1, -- Minimum XP to show toast
-    didFaceCapture = false, -- Whether we've already captured the face
-    frequentPerks = { -- Perks that gain XP frequently
+    EVENT_FILE = "events.json",
+    debug = true,
+    stateUpdateInterval = 1000,
+    minXpForToast = 1,
+    didFaceCapture = false,
+    frequentPerks = {
         "Fitness",
         "Strength"
     }
 }
 
-ZomboidEventMod.eventData = nil -- Storage for event data
-ZomboidEventMod.perkLevels = {} -- Track previous perk levels
+ZomboidEventMod.eventData = nil -- Stores the current event data before writing to file
+ZomboidEventMod.perkLevels = {} -- Tracks previous perk levels to detect changes
 
--- Simple JSON encoder
+-- Simple JSON encoder for Lua tables
+-- Handles numbers, booleans, strings, arrays, and objects
 function ZomboidEventMod.toJSON(data)
     if data == nil then return "null" end
     
@@ -107,7 +117,9 @@ function ZomboidEventMod.initializePerkLevels()
     end
 end
 
--- Utility function to write events to file
+-- Sends an event to the events file
+-- Adds timestamp and player info if available
+-- Also logs to console if debug is enabled
 function ZomboidEventMod.sendEvent(eventData)
     ZomboidEventMod.eventData = eventData
     if not ZomboidEventMod.eventData then return end
@@ -130,7 +142,8 @@ function ZomboidEventMod.sendEvent(eventData)
     end
 end
 
--- Capture face screenshot
+-- Captures a screenshot of the player's face from the character info window
+-- Used for the overlay to display the player's current appearance
 function ZomboidEventMod.captureFaceScreenshot()
     local infoWindow = ISCharacterInfoWindow.instance
     if infoWindow and infoWindow.avatarPanel then
@@ -143,8 +156,12 @@ function ZomboidEventMod.captureFaceScreenshot()
     end
 end
 
-
--- Get player stats
+-- Gets comprehensive player stats including:
+-- Health (overall and per body part)
+-- Position coordinates
+-- Current state (sleeping, resting, etc.)
+-- Stats (survival time, kills, weight, etc.)
+-- Equipment in hands
 function ZomboidEventMod.getPlayerStats(player)
     if not player then return nil end
     
@@ -280,6 +297,8 @@ function ZomboidEventMod.onZombieDead(zombie)
     ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
 end
 
+-- Sends a player state update event
+-- Rate limited to avoid spamming the events file
 function ZomboidEventMod.sendPlayerStateEvent()
     local player = getPlayer()
     if not player then return end
@@ -298,11 +317,13 @@ function ZomboidEventMod.sendPlayerStateEvent()
     end
 end
 
+-- Delayed screenshot capture to ensure the UI is fully rendered
 function ZomboidEventMod.delayedScreenshot()
     Events.OnPostRender.Remove(ZomboidEventMod.delayedScreenshot)
     getCore():TakeFullScreenshot("face_capture_temp.png")
 end
 
+-- Hooks into the character screen to capture face screenshots when opened
 function ZomboidEventMod.hookIntoHealthPanel()
     if ISCharacterScreen and not ISCharacterScreen._ZomboidEventMod_Hooked then
         local old_setVisible = ISCharacterScreen.setVisible
