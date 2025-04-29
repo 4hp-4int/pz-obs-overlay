@@ -298,19 +298,23 @@ function ZomboidEventMod.sendPlayerStateEvent()
     end
 end
 
+function ZomboidEventMod.delayedScreenshot()
+    Events.OnPostRender.Remove(ZomboidEventMod.delayedScreenshot)
+    getCore():TakeFullScreenshot("face_capture_temp.png")
+end
+
 function ZomboidEventMod.hookIntoHealthPanel()
     if ISCharacterScreen and not ISCharacterScreen._ZomboidEventMod_Hooked then
         local old_setVisible = ISCharacterScreen.setVisible
         ISCharacterScreen.setVisible = function(self, visible)
             if visible then
-                print("[ZomboidEventMod] Health Panel opened for player: " .. tostring(self.character and self.character:getUsername() or "unknown"))
+                print("[ZomboidEventMod] Health Panel opened")
+                Events.OnPostRender.Add(ZomboidEventMod.delayedScreenshot)
             end
             return old_setVisible(self, visible)
         end
         ISCharacterScreen._ZomboidEventMod_Hooked = true
         print("[ZomboidEventMod] Successfully hooked into `ISCharacterScreen:setVisible()`")
-        local core = getCore()
-        core:TakeFullScreenshot("screenshot_name.png")
     end
 end
 
