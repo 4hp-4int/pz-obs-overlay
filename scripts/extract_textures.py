@@ -5,11 +5,11 @@ import sys
 import platform
 from pathlib import Path
 import argparse
-import logging
 import subprocess
+from loguru import logger
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-logger = logging.getLogger(__name__)
+logger.remove()  # Remove default handler
+logger.add(sys.stderr, format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
 
 def is_wsl():
     """Check if we're running under Windows Subsystem for Linux."""

@@ -4,25 +4,24 @@ import time
 import os
 import sys
 import argparse
-import logging
 from pathlib import Path
 import websockets
 import asyncio
 from typing import Dict, Any, Optional, Set
+from loguru import logger
+from image_processor import ImageProcessor
+from dotenv import load_dotenv
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('event_daemon.log')
-    ]
-)
-logger = logging.getLogger('EventDaemon')
+load_dotenv()
+
+# Configure logging to both console and file
+logger.remove()  # Remove default handler
+logger.add(sys.stderr, format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
+logger.add("event_daemon.log", rotation="1 day", retention="7 days", format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}")
 
 def convert_windows_path_to_wsl(path: str) -> str:
-    """Convert a Windows path to a WSL-compatible path."""
+
+    
     # If it's already a WSL path, return as is
     if path.startswith('/'):
         return path
@@ -59,6 +58,8 @@ def parse_args():
     parser.add_argument('--log-level', type=str, default='INFO',
                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                        help='Set the logging level')
+    parser.add_argument('--verbose', action='store_true',
+                       help='Enable verbose logging of all events')
     
     args = parser.parse_args()
     # Convert Windows path to WSL path if needed
@@ -118,65 +119,71 @@ class EventValidator:
         return True
 
 class EventDaemon:
-    def __init__(self, events_file: str, host: str, port: int):
+    """
+    Main daemon class that manages WebSocket connections and event broadcasting.
+    Watches the events.json file for new events and sends them to connected clients.
+    """
+    def __init__(self, events_file: str, host: str, port: int, verbose: bool = False):
         self.events_file = Path(events_file)
+        self.screen_pos_file = self.events_file.parent / "screen_pos.json"
         self.host = host
         self.port = port
-        self.last_position = 0
         self.clients: Set[websockets.WebSocketServerProtocol] = set()
-        
-    async def register(self, websocket: websockets.WebSocketServerProtocol):
+        self.last_position = 0
+        self.last_screen_pos = 0
+        self.server = None
+        self.image_processor = ImageProcessor()
+        self.verbose = verbose
+
+    async def start_server(self):
+        """Start the WebSocket server and begin watching for events"""
+        self.server = await websockets.serve(self.handle_client, self.host, self.port)
+        logger.info(f"Server started on ws://{self.host}:{self.port}")
+        await self.watch_events()
+
+    async def handle_client(self, websocket: websockets.WebSocketServerProtocol, path: str):
+        """Handle new WebSocket client connections"""
         self.clients.add(websocket)
+        logger.info(f"New client connected. Total clients: {len(self.clients)}")
         try:
-            logger.info(f"Client connected. Total clients: {len(self.clients)}")
             await websocket.wait_closed()
         finally:
             self.clients.remove(websocket)
-            logger.info(f"Client disconnected. Remaining clients: {len(self.clients)}")
+            logger.info(f"Client disconnected. Total clients: {len(self.clients)}")
 
     async def broadcast(self, message: str):
+        """Broadcast a message to all connected clients"""
         if not self.clients:
             return
-        
-        # Broadcast to all connected clients
-        disconnected_clients = set()
+            
+        disconnected = set()
         for client in self.clients:
             try:
                 await client.send(message)
             except websockets.exceptions.ConnectionClosed:
-                disconnected_clients.add(client)
-            except Exception as e:
-                logger.error(f"Error sending to client: {e}")
-                disconnected_clients.add(client)
-        
+                disconnected.add(client)
+                
         # Remove disconnected clients
-        for client in disconnected_clients:
+        for client in disconnected:
             self.clients.remove(client)
+            logger.info(f"Removed disconnected client. Total clients: {len(self.clients)}")
 
     async def watch_events(self):
+        """
+        Continuously watch the events.json file for new events.
+        When new events are detected, they are broadcast to all connected clients.
+        """
         # Wait for file to exist
         while not self.events_file.exists():
-            logger.info(f"Waiting for {self.events_file} to be created...")
+            logger.info(f"Waiting for events file at {self.events_file}...")
             await asyncio.sleep(1)
-        
-        # Get initial file size
-        self.last_position = self.events_file.stat().st_size
+
+        logger.info(f"Found events file at {self.events_file}")
         
         while True:
             try:
-                if not self.events_file.exists():
-                    logger.warning("Events file was deleted, waiting for recreation...")
-                    self.last_position = 0
-                    await asyncio.sleep(1)
-                    continue
-
+                # Check for new events
                 current_size = self.events_file.stat().st_size
-                
-                if current_size < self.last_position:
-                    # File was truncated/recreated
-                    logger.info("Events file was truncated or recreated")
-                    self.last_position = 0
-                
                 if current_size > self.last_position:
                     # New data available
                     async with asyncio.Lock():  # Ensure thread-safe file reading
@@ -193,38 +200,93 @@ class EventDaemon:
                                     
                                     # Validate event structure
                                     if not EventValidator.validate_event(event):
-                                        logger.warning(f"Invalid event structure: {event}")
+                                        if self.verbose:
+                                            logger.warning(f"Invalid event structure: {event}")
                                         continue
                                         
                                     # Broadcast event to all clients
                                     await self.broadcast(line)
-                                    logger.debug(f"Broadcast event: {event}")
+                                    if self.verbose:
+                                        logger.debug(f"Broadcast event: {event}")
                                 except json.JSONDecodeError as e:
-                                    logger.error(f"Error parsing JSON: {e}")
+                                    if self.verbose:
+                                        logger.error(f"Error parsing JSON: {e}")
                                     continue
                                 except Exception as e:
-                                    logger.error(f"Error processing event: {e}")
+                                    if self.verbose:
+                                        logger.error(f"Error processing event: {e}")
                                     continue
                     
                     self.last_position = current_size
+
+                # Check for new screen position data
+                if self.screen_pos_file.exists():
+                    current_screen_pos_size = self.screen_pos_file.stat().st_size
+                    if current_screen_pos_size > self.last_screen_pos:
+                        async with asyncio.Lock():
+                            with open(self.screen_pos_file, 'r') as f:
+                                f.seek(self.last_screen_pos)
+                                new_lines = f.readlines()
+                                
+                                for line in new_lines:
+                                    line = line.strip()
+                                    if not line:
+                                        continue
+                                    try:
+                                        screen_pos = json.loads(line)
+                                        # Broadcast screen position update
+                                        await self.broadcast(json.dumps({
+                                            "type": "screen_pos",
+                                            "data": screen_pos
+                                        }))
+                                        if self.verbose:
+                                            logger.debug(f"Broadcast screen position: {screen_pos}")
+                                        
+                                        # Process the screenshot if it exists
+                                        screenshot_path = Path(convert_windows_path_to_wsl("C:\\Users\\Khalen\\Zomboid\\Screenshots\\face_capture_temp.png"))
+                                        logger.debug(f"Processing screenshot at: {screenshot_path}")
+                                        time.sleep(1)
+                                        if screenshot_path.exists():
+                                            # Crop the screenshot using the screen position
+                                            cropped_path = self.image_processor.crop_screenshot(
+                                                str(screenshot_path),
+                                                screen_pos
+                                            )
+                                            if cropped_path:
+                                                logger.info(f"Successfully cropped screenshot to {cropped_path}")
+                                                # Clean up the temporary screenshot
+                                                screenshot_path.unlink()
+                                                
+                                                # Generate sprite sheet using DALL-E with the cropped face as reference
+                                                sprite_sheet_path = Path("overlay/assets/sprite_sheet.png")
+                                                if self.image_processor.generate_sprite_sheet_dalle(
+                                                    str(sprite_sheet_path),
+                                                    face_image=Path(cropped_path)
+                                                ):
+                                                    logger.info("Created new DALL-E generated sprite sheet")
+                                    except json.JSONDecodeError as e:
+                                        if self.verbose:
+                                            logger.error(f"Error parsing screen position JSON: {e}")
+                                        continue
+                                    
+                        # Clear the screen_pos file after reading
+                        with open(self.screen_pos_file, 'w') as f:
+                            f.write('')
+                        self.last_screen_pos = 0
             
             except Exception as e:
                 logger.error(f"Error reading file: {e}")
             
             await asyncio.sleep(0.1)  # Small delay between checks
 
-    async def start_server(self):
-        async with websockets.serve(self.register, self.host, self.port):
-            logger.info(f"WebSocket server started on ws://{self.host}:{self.port}")
-            await self.watch_events()  # Start watching for events
-
 async def main():
+    """Main entry point for the event daemon"""
     args = parse_args()
     
     # Set log level from arguments
-    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    logger.level(args.log_level)
     
-    daemon = EventDaemon(args.events_file, args.host, args.port)
+    daemon = EventDaemon(args.events_file, args.host, args.port, args.verbose)
     await daemon.start_server()
 
 if __name__ == "__main__":
@@ -234,4 +296,4 @@ if __name__ == "__main__":
         logger.info("Shutting down daemon...")
     except Exception as e:
         logger.critical(f"Fatal error: {e}")
-        sys.exit(1) 
+        raise

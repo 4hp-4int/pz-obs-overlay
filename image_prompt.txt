@@ -1,0 +1,41 @@
+Prompt (Final Version):
+
+Create a pixel art sprite sheet for a talking head avatar inspired by 1990s first-person shooter games.
+
+Input: I will provide a source character image (face).
+
+Output Requirements:
+
+Style: Pixel art, chunky 16–32 pixel blockiness.
+
+Canvas size: 768px wide x 768px tall overall.
+
+Frame layout: 2 rows by 2 columns (4 frames total).
+
+Each frame: 384px wide x 384px tall.
+
+Background: Fully transparent (no color fill).
+
+Character Position: Centered in each frame with clear face and shoulders.
+
+Facial Expressions per frame:
+
+Neutral expression (mouth closed)
+
+Small mouth open (light talking)
+
+Wide mouth open (shouting)
+
+Raised eyebrow / smirk (optional mood frame)
+
+Consistent lighting: Front-lit face.
+
+Maintain camera angle consistency (no tilting or skewing across frames).
+
+Visual Style:
+
+Inspired by classic Doom Guy status bar sprites.
+
+Limited color palette (~16 colors).
+
+Bold shading, sharp pixel outlines, no blurring.

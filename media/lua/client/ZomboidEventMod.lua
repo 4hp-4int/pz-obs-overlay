@@ -8,6 +8,7 @@ ZomboidEventMod = ZomboidEventMod or {}
 
 -- Configuration settings for the mod
 -- EVENT_FILE: Where to write the events JSON
+-- SCREEN_POS_FILE: Where to write the screen position data
 -- debug: Enable/disable debug logging
 -- stateUpdateInterval: How often to send player state updates (in milliseconds)
 -- minXpForToast: Minimum XP gain to show a toast notification
@@ -15,6 +16,7 @@ ZomboidEventMod = ZomboidEventMod or {}
 -- frequentPerks: List of perks that gain XP frequently to avoid spam
 ZomboidEventMod.config = {
     EVENT_FILE = "events.json",
+    SCREEN_POS_FILE = "screen_pos.json",
     debug = true,
     stateUpdateInterval = 1000,
     minXpForToast = 1,
@@ -76,9 +78,15 @@ function ZomboidEventMod.initializeWriter()
         saveFolder = "Saves"
     end
     ZomboidEventMod.eventFilePath = saveFolder .. "/" .. ZomboidEventMod.config.EVENT_FILE
+    ZomboidEventMod.screenPosFilePath = saveFolder .. "/" .. ZomboidEventMod.config.SCREEN_POS_FILE
     
-    -- Create/clear the file
+    -- Create/clear the files
     local writer = getFileWriter(ZomboidEventMod.eventFilePath, true, true)
+    if writer then
+        writer:close() -- Just create/clear the file
+    end
+    
+    writer = getFileWriter(ZomboidEventMod.screenPosFilePath, true, true)
     if writer then
         writer:close() -- Just create/clear the file
     end
@@ -330,6 +338,35 @@ function ZomboidEventMod.hookIntoHealthPanel()
         ISCharacterScreen.setVisible = function(self, visible)
             if visible then
                 print("[ZomboidEventMod] Health Panel opened")
+                
+                -- Get screen position
+                local x = self:getParent():getAbsoluteX()
+                local y = self:getParent():getAbsoluteY()
+                local width = self:getParent():getWidth()
+                local height = self:getParent():getHeight()
+                
+                -- Clear the file first
+                local writer = getFileWriter(ZomboidEventMod.screenPosFilePath, true, true)
+                if writer then
+                    writer:close()
+                end
+                
+                -- Save screen position to file
+                local screenPosData = {
+                    x = x,
+                    y = y,
+                    width = width,
+                    height = height,
+                    timestamp = getGameTime():getWorldAgeHours()
+                }
+                
+                writer = getFileWriter(ZomboidEventMod.screenPosFilePath, true, true)
+                if writer then
+                    writer:writeln(ZomboidEventMod.toJSON(screenPosData))
+                    writer:close()
+                end
+                
+                -- Capture screenshot after position is saved
                 Events.OnPostRender.Add(ZomboidEventMod.delayedScreenshot)
             end
             return old_setVisible(self, visible)

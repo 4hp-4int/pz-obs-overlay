@@ -1,23 +1,24 @@
-// Configuration
+// Configuration for the HUD overlay
+// Contains WebSocket connection settings, UI positioning, and other display options
 const config = {
-    // WebSocket connection
-    wsUrl: 'ws://127.0.0.1:8080',
-    reconnectDelay: 1000,
-    maxReconnectDelay: 30000,
+    // WebSocket connection settings
+    wsUrl: 'ws://127.0.0.1:8080', // WebSocket server URL
+    reconnectDelay: 1000, // Initial delay before reconnecting (ms)
+    maxReconnectDelay: 30000, // Maximum reconnection delay (ms)
 
-    // UI settings
+    // UI positioning settings
     position: {
         top: '20px',
         right: '20px'
     },
 
     // Toast notification settings
-    toastDuration: 3000,
+    toastDuration: 3000, // How long to show toast messages (ms)
 
-    // Debug mode
+    // Debug mode - enables console logging
     debug: true,
 
-    // Icon settings
+    // Default icon and sprite sheet paths
     defaultIcon: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
     spriteSheets: {
         'ui': 'assets/ui.png',
@@ -30,17 +31,18 @@ const config = {
         'farming': 'assets/itemThuztorFarming1.png'
     },
 
-    // State persistence
-    stateKey: 'pz_hud_state',
-    maxStateAge: 5 * 60 * 1000, // 5 minutes in milliseconds
+    // State persistence settings
+    stateKey: 'pz_hud_state', // localStorage key for saving state
+    maxStateAge: 5 * 60 * 1000, // Maximum age of saved state (5 minutes)
 
-    // Weapon texture fallbacks
+    // Weapon texture fallbacks for missing textures
     textureFallbacks: {
         'Item_Crowbar_Forged': 'Item_Crowbar'
     }
 };
 
-// Sprite Manager
+// Manages sprite loading and texture mapping
+// Handles loading sprite sheets and mapping item names to textures
 class SpriteManager {
     constructor() {
         this.spriteData = window.SPRITE_DATA;
@@ -85,249 +87,8 @@ class SpriteManager {
     }
 }
 
-// State Manager
-class StateManager {
-    constructor() {
-        this.currentState = {
-            health: 100,
-            weight: { current: 0, max: 0 },
-            location: 'outside',
-            weapons: {
-                primary: null,
-                secondary: null
-            },
-            lastUpdate: Date.now()
-        };
-    }
-
-    saveState() {
-        this.currentState.lastUpdate = Date.now();
-        localStorage.setItem(config.stateKey, JSON.stringify(this.currentState));
-    }
-
-    loadState() {
-        try {
-            const savedState = localStorage.getItem(config.stateKey);
-            if (savedState) {
-                const parsedState = JSON.parse(savedState);
-                const stateAge = Date.now() - parsedState.lastUpdate;
-
-                if (stateAge < config.maxStateAge) {
-                    this.currentState = parsedState;
-                    return true;
-                } else {
-                    localStorage.removeItem(config.stateKey);
-                }
-            }
-        } catch (e) {
-            console.error('Failed to load saved state:', e);
-        }
-        return false;
-    }
-
-    updateState(newState) {
-        this.currentState = { ...this.currentState, ...newState };
-        this.saveState();
-    }
-
-    getState() {
-        return { ...this.currentState };
-    }
-}
-
-// UI Manager
-class UIManager {
-    constructor() {
-        this.spriteManager = new SpriteManager();
-        this.initializeElements();
-        this.toastQueue = [];
-        this.activeToasts = 0;
-        this.maxToasts = 3;
-    }
-
-    initializeElements() {
-        this.elements = {
-            health: {
-                bar: document.getElementById('health-bar'),
-                infection: document.getElementById('infection-level'),
-                pain: document.getElementById('pain-level'),
-                bodyParts: {
-                    head: document.getElementById('head-health'),
-                    torso: document.getElementById('torso-health'),
-                    leftArm: document.getElementById('left-arm-health'),
-                    rightArm: document.getElementById('right-arm-health'),
-                    leftLeg: document.getElementById('left-leg-health'),
-                    rightLeg: document.getElementById('right-leg-health')
-                }
-            },
-            weight: {
-                bar: document.getElementById('weight-bar'),
-                text: document.getElementById('weight-text')
-            },
-            location: {
-                indicator: document.getElementById('location-indicator'),
-                text: document.getElementById('location-text')
-            },
-            weapons: {
-                primary: {
-                    container: document.getElementById('primary-weapon'),
-                    icon: document.getElementById('primary-weapon-icon'),
-                    name: document.getElementById('primary-weapon-name')
-                },
-                secondary: {
-                    container: document.getElementById('secondary-weapon'),
-                    icon: document.getElementById('secondary-weapon-icon'),
-                    name: document.getElementById('secondary-weapon-name')
-                }
-            }
-        };
-    }
-
-    updateHealth(healthPercent) {
-        const healthBar = this.elements.health.bar;
-        healthBar.style.transform = `scaleX(${healthPercent / 100})`;
-
-        if (healthPercent <= 25) {
-            healthBar.classList.add('low-health');
-        } else {
-            healthBar.classList.remove('low-health');
-        }
-
-        if (healthPercent < this.currentHealth) {
-            healthBar.classList.add('damage-taken');
-            setTimeout(() => {
-                healthBar.classList.remove('damage-taken');
-            }, 300);
-        }
-
-        this.currentHealth = healthPercent;
-    }
-
-    updateHealthStats(stats) {
-        if (stats) {
-            this.updateHealthStat('infection', stats.infectionLevel);
-            this.updateHealthStat('pain', stats.painLevel);
-        }
-    }
-
-    updateHealthStat(stat, value) {
-        const element = this.elements.health[stat];
-        if (element) {
-            const valueElement = element.querySelector('.stat-value');
-            if (valueElement) {
-                valueElement.textContent = `${Math.round(value)}%`;
-            }
-        }
-    }
-
-    updateBodyPartHealth(part, value) {
-        const element = this.elements.health.bodyParts[part];
-        if (element) {
-            const percent = Math.round(value);
-            const displayName = part.split('-').map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
-            element.textContent = `${displayName}: ${percent}%`;
-
-            if (percent < 50) {
-                element.classList.add('damaged');
-            } else {
-                element.classList.remove('damaged');
-            }
-        }
-    }
-
-    updateWeight(current, max) {
-        const weightPercent = (current / max) * 100;
-        this.elements.weight.bar.style.width = `${weightPercent}%`;
-        this.elements.weight.text.textContent =
-            `${current.toFixed(1)}/${max.toFixed(1)}`;
-    }
-
-    updateLocation(isOutside) {
-        const { indicator, text } = this.elements.location;
-        if (isOutside) {
-            indicator.className = 'state-indicator outside';
-            text.textContent = 'Outside';
-        } else {
-            indicator.className = 'state-indicator inside';
-            text.textContent = 'Inside';
-        }
-    }
-
-    updateWeapon(slot, weapon) {
-        const { container, icon, name } = this.elements.weapons[slot];
-
-        if (weapon) {
-            const resolvedTexture = this.spriteManager.getWeaponTexture(weapon.texture);
-            container.classList.remove('empty');
-
-            const spriteStyle = this.spriteManager.getSpriteStyle(resolvedTexture);
-            Object.assign(icon.style, spriteStyle);
-            name.textContent = weapon.name;
-        } else {
-            container.classList.add('empty');
-            icon.style.backgroundImage = '';
-            icon.style.backgroundPosition = '';
-            icon.style.width = '';
-            icon.style.height = '';
-            name.textContent = '';
-        }
-    }
-
-    showToast(message, iconPath = null, toastClass = '') {
-        // If too many toasts, queue it
-        if (this.activeToasts >= this.maxToasts) {
-            this.toastQueue.push([message, iconPath]);
-            return;
-        }
-        this.activeToasts++;
-        const toast = document.createElement('div');
-        toast.className = `toast ${toastClass}`;
-
-        if (iconPath) {
-            const icon = document.createElement('div');
-            icon.className = 'icon';
-
-            // Special case: when killing zombies with bare hands, show a fist emoji
-            if (iconPath === 'none') {
-                icon.textContent = '👊';
-                icon.style.fontSize = '24px';
-                icon.style.lineHeight = '24px';
-                icon.style.textAlign = 'center';
-            } else {
-                const resolvedTexture = this.spriteManager.getWeaponTexture(iconPath);
-                const spriteStyle = this.spriteManager.getSpriteStyle(resolvedTexture);
-                Object.assign(icon.style, spriteStyle);
-            }
-
-            toast.appendChild(icon);
-        }
-
-        const text = document.createElement('span');
-        text.textContent = message;
-        toast.appendChild(text);
-
-        const container = document.getElementById('toast-container');
-        if (container) {
-            container.appendChild(toast);
-        } else {
-            document.body.appendChild(toast);
-        }
-
-        setTimeout(() => {
-            toast.remove();
-            this.activeToasts--;
-            // Show next toast in queue if any
-            if (this.toastQueue.length > 0) {
-                const [nextMsg, nextIcon] = this.toastQueue.shift();
-                this.showToast(nextMsg, nextIcon);
-            }
-        }, config.toastDuration);
-    }
-}
-
-// WebSocket Manager
+// Manages WebSocket connections and reconnection logic
+// Handles connecting to the event daemon and processing incoming events
 class WebSocketManager {
     constructor(eventHandler) {
         this.ws = null;
@@ -336,6 +97,7 @@ class WebSocketManager {
         this.eventHandler = eventHandler;
     }
 
+    // Establishes WebSocket connection with exponential backoff
     connect() {
         if (this.ws) {
             this.ws.close();
@@ -373,6 +135,7 @@ class WebSocketManager {
         };
     }
 
+    // Cleanly disconnect from WebSocket
     disconnect() {
         if (this.ws) {
             this.ws.close();
@@ -385,7 +148,8 @@ class WebSocketManager {
     }
 }
 
-// Main HUD Class
+// Main HUD class that coordinates all components
+// Manages state, UI updates, and WebSocket communication
 class HUD {
     constructor() {
         this.stateManager = new StateManager();
@@ -393,6 +157,8 @@ class HUD {
         this.wsManager = new WebSocketManager(this.handleEvent.bind(this));
     }
 
+    // Initialize the HUD
+    // Loads saved state and establishes WebSocket connection
     initialize() {
         // Try to load saved state
         if (this.stateManager.loadState()) {
@@ -408,6 +174,8 @@ class HUD {
         this.wsManager.connect();
     }
 
+    // Handle incoming events from WebSocket
+    // Updates UI based on event type and data
     handleEvent(event) {
         if (config.debug) {
             console.debug('Received event:', event);
