@@ -9,6 +9,7 @@ ZomboidEventMod.config = {
     debug = true, -- Set to true to enable debug logging
     stateUpdateInterval = 1000, -- Interval in ms to send state updates
     minXpForToast = 1, -- Minimum XP to show toast
+    didFaceCapture = false, -- Whether we've already captured the face
     frequentPerks = { -- Perks that gain XP frequently
         "Fitness",
         "Strength"
@@ -128,6 +129,20 @@ function ZomboidEventMod.sendEvent(eventData)
         print("[ZOMBOID_EVENT] " .. json_data)
     end
 end
+
+-- Capture face screenshot
+function ZomboidEventMod.captureFaceScreenshot()
+    local infoWindow = ISCharacterInfoWindow.instance
+    if infoWindow and infoWindow.avatarPanel then
+        if ZomboidEventMod.config.debug then
+            print("[ZomboidEventMod] Capturing face screenshot...")
+        end
+        Core.TakeFullScreenshot("face_capture_temp.png")
+    elseif ZomboidEventMod.config.debug then
+        print("[ZomboidEventMod] Avatar panel not available yet.")
+    end
+end
+
 
 -- Get player stats
 function ZomboidEventMod.getPlayerStats(player)
@@ -265,7 +280,7 @@ function ZomboidEventMod.onZombieDead(zombie)
     ZomboidEventMod.sendEvent(ZomboidEventMod.eventData)
 end
 
-local function sendPlayerStateEvent()
+function ZomboidEventMod.sendPlayerStateEvent()
     local player = getPlayer()
     if not player then return end
     
@@ -283,7 +298,22 @@ local function sendPlayerStateEvent()
     end
 end
 
--- Initialization
+function ZomboidEventMod.hookIntoHealthPanel()
+    if ISCharacterScreen and not ISCharacterScreen._ZomboidEventMod_Hooked then
+        local old_setVisible = ISCharacterScreen.setVisible
+        ISCharacterScreen.setVisible = function(self, visible)
+            if visible then
+                print("[ZomboidEventMod] Health Panel opened for player: " .. tostring(self.character and self.character:getUsername() or "unknown"))
+            end
+            return old_setVisible(self, visible)
+        end
+        ISCharacterScreen._ZomboidEventMod_Hooked = true
+        print("[ZomboidEventMod] Successfully hooked into `ISCharacterScreen:setVisible()`")
+        local core = getCore()
+        core:TakeFullScreenshot("screenshot_name.png")
+    end
+end
+
 function ZomboidEventMod.initializeEvents()
     -- Only bind events once
     if ZomboidEventMod.initialized then return end
@@ -294,7 +324,7 @@ function ZomboidEventMod.initializeEvents()
     
     Events.AddXP.Add(ZomboidEventMod.onAddXP)
     Events.OnZombieDead.Add(ZomboidEventMod.onZombieDead)
-    Events.OnPlayerUpdate.Add(sendPlayerStateEvent)
+    Events.OnPlayerUpdate.Add(ZomboidEventMod.sendPlayerStateEvent)
     
     ZomboidEventMod.initialized = true
     
@@ -302,6 +332,7 @@ function ZomboidEventMod.initializeEvents()
         print("[ZomboidEventMod] Events initialized successfully")
     end
 end
+
 
 -- Boot and Start handlers
 function ZomboidEventMod.onGameBoot()
@@ -317,10 +348,11 @@ function ZomboidEventMod.onGameStart()
     ZomboidEventMod.initializeEvents()
     ZomboidEventMod.initializeWriter()
     ZomboidEventMod.initializePerkLevels()
+    ZomboidEventMod.hookIntoHealthPanel()
 end
 
 -- Register core game events
 Events.OnGameBoot.Add(ZomboidEventMod.onGameBoot)
 Events.OnGameStart.Add(ZomboidEventMod.onGameStart)
 
-return ZomboidEventMod 
+return ZomboidEventMod
