@@ -426,12 +426,12 @@ body::before {
 }
 
 #talking-head {
-    width: 256px;
-    height: 256px;
+    width: 64px;
+    height: 64px;
     background-image: url('assets/sprite_sheet.png');
     background-repeat: no-repeat;
     background-position: 0 0;
-    background-size: 514px 514px;
+    background-size: 128px 128px;
     border-radius: 10px;
     border: 2px solid var(--border-color);
     box-shadow: var(--panel-glow);

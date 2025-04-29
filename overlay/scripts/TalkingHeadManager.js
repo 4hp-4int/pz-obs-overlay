@@ -25,13 +25,13 @@ class TalkingHeadManager {
             smirk: 4
         };
 
-        // The sprite sheet is displayed at 514x514 via CSS (scaled from 1024x1024)
-        // Each frame is 257x257 in the scaled view (slightly adjusted to prevent pixel seams)
+        // The sprite sheet is displayed at 128x128 via CSS
+        // Each frame is 64x64 in the view
         this.framePositions = {
             1: { x: 0, y: 0 },     // top-left (closed)
-            2: { x: 257, y: 0 },   // top-right (small open)
-            3: { x: 0, y: 257 },   // bottom-left (wide open)
-            4: { x: 257, y: 257 }  // bottom-right (smirk)
+            2: { x: 64, y: 0 },    // top-right (small open)
+            3: { x: 0, y: 64 },    // bottom-left (wide open)
+            4: { x: 64, y: 64 }    // bottom-right (smirk)
         };
     }
 

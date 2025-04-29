@@ -235,11 +235,6 @@ class EventDaemon:
                                         continue
                                     try:
                                         screen_pos = json.loads(line)
-                                        # Broadcast screen position update
-                                        await self.broadcast(json.dumps({
-                                            "type": "screen_pos",
-                                            "data": screen_pos
-                                        }))
                                         if self.verbose:
                                             logger.debug(f"Broadcast screen position: {screen_pos}")
                                         
