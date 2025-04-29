@@ -355,10 +355,25 @@ class UIManager {
         toast.textContent = message;
 
         if (icon) {
-            const iconElement = document.createElement('div');
-            iconElement.className = 'icon';
-            Object.assign(iconElement.style, this.spriteManager.getSpriteStyle(icon));
-            toast.prepend(iconElement);
+            // Check if the icon is an emoji (starts with a Unicode character)
+            const isEmoji = /^\p{Emoji}/u.test(icon);
+
+            if (isEmoji) {
+                // For emoji, create a text element
+                const emojiElement = document.createElement('div');
+                emojiElement.className = 'emoji-icon';
+                emojiElement.textContent = icon;
+                toast.prepend(emojiElement);
+            } else {
+                // For sprite textures, use the sprite manager
+                const iconElement = document.createElement('div');
+                iconElement.className = 'icon';
+                // Get the correct texture from weapon texture map if needed
+                const texture = this.spriteManager.getWeaponTexture(icon);
+                // Apply the sprite style
+                Object.assign(iconElement.style, this.spriteManager.getSpriteStyle(texture));
+                toast.prepend(iconElement);
+            }
         }
 
         this.elements.toastContainer.appendChild(toast);
@@ -416,11 +431,69 @@ class HUD {
                 break;
             case 'xp_gain':
                 if (event.amount >= 1) {
-                    this.uiManager.showToast(`+${event.amount} XP: ${event.perk}`, null, 'xp-toast');
+                    // Use emoji for XP gains based on the perk
+                    let xpEmoji = '⭐'; // Default star emoji
+
+                    // Map perks to appropriate emojis
+                    const perkEmojis = {
+                        // Passive Skills
+                        'Strength': '💪',
+                        'Fitness': '🏃',
+
+                        // Agility Skills
+                        'Sprinting': '🏃‍♂️',
+                        'Running': '🏃‍♂️',
+                        'Lightfooted': '🦶',
+                        'Nimble': '🤸',
+                        'Sneaking': '🕵️',
+
+                        // Combat Skills
+                        'Axe': '🪓',
+                        'Long Blunt': '🔨',
+                        'Short Blunt': '🔧',
+                        'Long Blade': '⚔️',
+                        'Short Blade': '🔪',
+                        'Spear': '🔱',
+                        'Maintenance': '🛠️',
+
+                        // Crafting Skills
+                        'Carpentry': '🪚',
+                        'Carving': '🪵',
+                        'Cooking': '🍳',
+                        'First Aid': '🩺',
+                        'Electrical': '⚡',
+                        'Metalworking': '🔥',
+                        'Mechanics': '⚙️',
+                        'Masonry': '🧱',
+                        'Pottery': '🥣',
+                        'Knapping': '🔨',
+                        'Glassmaking': '🥛',
+                        'Tailoring': '🧵',
+                        'Welding': '🔥',
+
+                        // Firearm Skills
+                        'Aiming': '🎯',
+                        'Reloading': '🔫',
+
+                        // Survivalist Skills
+                        'Agriculture': '🌱',
+                        'Fishing': '🎣',
+                        'Trapping': '🪤',
+                        'Foraging': '🌿',
+                        'Animal Care': '🐾',
+                        'Butchering': '🥩',
+                        'Tracking': '🐾',
+                    };
+
+                    if (perkEmojis[event.perk]) {
+                        xpEmoji = perkEmojis[event.perk];
+                    }
+
+                    this.uiManager.showToast(`+${event.amount} XP: ${event.perk}`, xpEmoji, 'xp-toast');
                 }
                 break;
             case 'level_up':
-                this.uiManager.showToast(`Level Up! ${event.perk} Level ${event.level}`, null, 'level-up-toast');
+                this.uiManager.showToast(`Level Up! ${event.perk} Level ${event.level}`, '🏆', 'level-up-toast');
                 break;
             case 'zombie_kill':
                 const weaponText = event.weapon === 'none' ? 'bare hands' : event.weapon;

@@ -92,7 +92,8 @@ body::before {
 }
 
 .hud-topleft {
-    top: 20px;
+    top: calc(100vh - 420px);
+    /* Position from bottom, accounting for health panel height + equipment widget + spacing */
     left: 20px;
 }
 
@@ -193,6 +194,7 @@ body::before {
     display: flex;
     flex-direction: column;
     box-shadow: var(--panel-glow);
+    margin-bottom: 20px;
 }
 
 .health-details {
@@ -281,10 +283,20 @@ body::before {
     object-fit: contain;
 }
 
+.emoji-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+}
+
 #toast-container {
     position: fixed;
     left: 50%;
-    bottom: 40px;
+    bottom: 73px;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -295,7 +307,7 @@ body::before {
 }
 
 .toast {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.85);
     color: white;
     padding: 10px 15px;
     border-radius: 4px;
@@ -304,7 +316,7 @@ body::before {
     align-items: center;
     gap: 10px;
     animation: slideIn 0.3s ease-out;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
 .xp-toast {
@@ -312,11 +324,36 @@ body::before {
     border-left: 4px solid #4CAF50;
 }
 
+.xp-toast .emoji-icon {
+    font-size: 28px;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
+}
+
 .level-up-toast {
     background-color: rgba(0, 0, 100, 0.8);
     border-left: 4px solid #2196F3;
     font-weight: bold;
     animation: pulse 1s infinite;
+}
+
+.level-up-toast .emoji-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 0 5px gold);
+    animation: rotate 2s ease-in-out infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(-10deg);
+    }
+
+    50% {
+        transform: rotate(10deg);
+    }
+
+    100% {
+        transform: rotate(-10deg);
+    }
 }
 
 @keyframes slideIn {
@@ -426,12 +463,12 @@ body::before {
 }
 
 #talking-head {
-    width: 64px;
-    height: 64px;
+    width: 128px;
+    height: 128px;
     background-image: url('assets/sprite_sheet.png');
     background-repeat: no-repeat;
     background-position: 0 0;
-    background-size: 128px 128px;
+    background-size: 256px 256px;
     border-radius: 10px;
     border: 2px solid var(--border-color);
     box-shadow: var(--panel-glow);

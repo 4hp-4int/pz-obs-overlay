@@ -34,7 +34,7 @@ def convert_windows_path_to_wsl(path: str) -> str:
         # Convert backslashes to forward slashes first
         path = path.replace('\\', '/')
         # Convert to WSL format
-        return f"/mnt/{drive.lower()}{path}"
+        return "/mnt/" + drive.lower() + path
     
     # If no drive letter, assume relative path
     return path.replace('\\', '/')

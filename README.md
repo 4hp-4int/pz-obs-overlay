@@ -19,7 +19,7 @@ This project consists of three main components:
 - Real-time tracking of player stats and events
 - WebSocket-based event broadcasting
 - Transparent overlay for Twitch chat messages
-- Cross-platform support (Windows/WSL)
+- Cross-platform support (Windows/WSL/Linux/macOS)
 - Configurable event tracking and logging
 
 ## Talking Head Overlay
@@ -60,6 +60,7 @@ python event_daemon.py
 
 Optional arguments:
 - `--events-file`: Path to events.json (default: auto-detected)
+- `--screenshot-path`: Path to the screenshot file for face capture (default: auto-detected)
 - `--host`: WebSocket server host (default: localhost)
 - `--port`: WebSocket server port (default: 8080)
 - `--log-level`: Logging level (default: INFO)
@@ -76,6 +77,26 @@ The mod's configuration can be adjusted in `ZomboidEventMod.lua`:
 - `EVENT_FILE`: Path to write events
 - `debug`: Enable/disable debug logging
 - `stateUpdateInterval`: Interval for state updates (in milliseconds)
+
+### Cross-Platform Path Configuration
+
+The system automatically handles path differences between operating systems. You can also customize paths using environment variables:
+
+- `ZOMBOID_USER_DIR`: Custom path to your Project Zomboid user directory (contains Saves, Screenshots, etc.)
+- `ZOMBOID_INSTALL_DIR`: Custom path to your Project Zomboid installation directory
+
+#### Windows and WSL
+
+When running in WSL (Windows Subsystem for Linux) while Project Zomboid runs on Windows, the system automatically converts paths between formats:
+
+```
+Windows path: C:\Users\YourName\Zomboid\Saves\events.json
+WSL path: /mnt/c/Users/YourName/Zomboid/Saves/events.json
+```
+
+#### Linux and macOS
+
+On native Linux and macOS, the system looks for Project Zomboid directories in their standard locations.
 
 ## Event Types
 
@@ -100,9 +121,17 @@ The system tracks various game events including:
 │   ├── index.html
 │   └── package.json
 ├── event_daemon.py      # Python event daemon
+├── scripts/             # Utility scripts
+│   └── extract_textures.py  # Extract game textures
 ├── requirements.txt     # Python dependencies
 └── README.md
 ```
+
+### Utility Scripts
+
+- `scripts/extract_textures.py`: Extracts Project Zomboid item icons for use in the overlay
+  - Automatically detects your Project Zomboid installation
+  - Can be configured with the `--zomboid-path` argument
 
 ### Contributing
 
