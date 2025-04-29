@@ -414,3 +414,32 @@ body::before {
         opacity: 1;
     }
 }
+
+/* Talking Head Styles */
+.talking-head-container {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    z-index: 10;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+#talking-head {
+    width: 256px;
+    height: 256px;
+    background-image: url('assets/sprite_sheet.png');
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: 514px 514px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--panel-glow);
+    transition: border-color 0.3s ease;
+    image-rendering: pixelated;
+}
+
+#talking-head:hover {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 20px rgba(77, 238, 234, 0.3);
+}

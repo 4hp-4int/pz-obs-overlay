@@ -87,6 +87,78 @@ class SpriteManager {
     }
 }
 
+// Manages state persistence through localStorage
+// Handles saving and loading HUD state
+class StateManager {
+    constructor() {
+        this.state = {
+            health: 100,
+            weight: {
+                current: 0,
+                max: 0
+            },
+            location: 'outside',
+            weapons: {
+                primary: null,
+                secondary: null
+            },
+            lastUpdated: Date.now()
+        };
+    }
+
+    // Load state from localStorage
+    loadState() {
+        try {
+            const savedState = localStorage.getItem(config.stateKey);
+            if (!savedState) {
+                return false;
+            }
+
+            const parsedState = JSON.parse(savedState);
+            const stateAge = Date.now() - parsedState.lastUpdated;
+
+            // Check if state is too old
+            if (stateAge > config.maxStateAge) {
+                localStorage.removeItem(config.stateKey);
+                return false;
+            }
+
+            this.state = parsedState;
+            return true;
+        } catch (e) {
+            console.error('Failed to load state:', e);
+            return false;
+        }
+    }
+
+    // Save state to localStorage
+    saveState() {
+        try {
+            this.state.lastUpdated = Date.now();
+            localStorage.setItem(config.stateKey, JSON.stringify(this.state));
+            return true;
+        } catch (e) {
+            console.error('Failed to save state:', e);
+            return false;
+        }
+    }
+
+    // Update specific state properties
+    updateState(updates) {
+        this.state = {
+            ...this.state,
+            ...updates,
+            lastUpdated: Date.now()
+        };
+        this.saveState();
+    }
+
+    // Get the current state
+    getState() {
+        return this.state;
+    }
+}
+
 // Manages WebSocket connections and reconnection logic
 // Handles connecting to the event daemon and processing incoming events
 class WebSocketManager {
@@ -148,6 +220,159 @@ class WebSocketManager {
     }
 }
 
+// Manages UI updates
+// Handles updating all HUD elements
+class UIManager {
+    constructor() {
+        this.elements = {
+            health: {
+                bar: document.getElementById('health-bar'),
+                infection: document.getElementById('infection-level'),
+                pain: document.getElementById('pain-level'),
+                bodyParts: {
+                    head: document.getElementById('head-health'),
+                    torso: document.getElementById('torso-health'),
+                    leftArm: document.getElementById('left-arm-health'),
+                    rightArm: document.getElementById('right-arm-health'),
+                    leftLeg: document.getElementById('left-leg-health'),
+                    rightLeg: document.getElementById('right-leg-health')
+                }
+            },
+            weight: {
+                bar: document.getElementById('weight-bar'),
+                text: document.getElementById('weight-text')
+            },
+            location: {
+                indicator: document.getElementById('location-indicator'),
+                text: document.getElementById('location-text')
+            },
+            weapons: {
+                primary: {
+                    container: document.getElementById('primary-weapon'),
+                    icon: document.getElementById('primary-weapon-icon'),
+                    name: document.getElementById('primary-weapon-name')
+                },
+                secondary: {
+                    container: document.getElementById('secondary-weapon'),
+                    icon: document.getElementById('secondary-weapon-icon'),
+                    name: document.getElementById('secondary-weapon-name')
+                }
+            },
+            toastContainer: document.getElementById('toast-container')
+        };
+        this.spriteManager = new SpriteManager();
+    }
+
+    // Update health bar
+    updateHealth(healthPercent) {
+        if (!this.elements.health.bar) return;
+
+        const scaleValue = healthPercent / 100;
+        this.elements.health.bar.style.transform = `scaleX(${scaleValue})`;
+
+        if (healthPercent <= 25) {
+            this.elements.health.bar.classList.add('low-health');
+        } else {
+            this.elements.health.bar.classList.remove('low-health');
+        }
+    }
+
+    // Update health stats (infection, pain)
+    updateHealthStats(stats) {
+        if (!stats) return;
+
+        if (stats.infection !== undefined && this.elements.health.infection) {
+            const infection = Math.round(stats.infection * 100) + '%';
+            this.elements.health.infection.querySelector('.stat-value').textContent = infection;
+        }
+
+        if (stats.pain !== undefined && this.elements.health.pain) {
+            const pain = Math.round(stats.pain * 100) + '%';
+            this.elements.health.pain.querySelector('.stat-value').textContent = pain;
+        }
+    }
+
+    // Update body part health
+    updateBodyPartHealth(part, health) {
+        const bodyPartElement = this.elements.health.bodyParts[part];
+        if (!bodyPartElement) return;
+
+        const healthPercent = Math.round(health * 100);
+        const partLabel = part.replace(/([A-Z])/g, ' $1').trim();
+        bodyPartElement.textContent = `${partLabel}: ${healthPercent}%`;
+
+        if (healthPercent < 100) {
+            bodyPartElement.classList.add('damaged');
+        } else {
+            bodyPartElement.classList.remove('damaged');
+        }
+    }
+
+    // Update weight display
+    updateWeight(current, max) {
+        if (!this.elements.weight.bar || !this.elements.weight.text) return;
+
+        const weightPercent = Math.min((current / max) * 100, 100);
+        this.elements.weight.bar.style.width = `${weightPercent}%`;
+        this.elements.weight.text.textContent = `${current.toFixed(1)}/${max.toFixed(1)}`;
+    }
+
+    // Update location indicator
+    updateLocation(isOutside) {
+        if (!this.elements.location.indicator || !this.elements.location.text) return;
+
+        this.elements.location.indicator.className = 'state-indicator';
+        this.elements.location.indicator.classList.add(isOutside ? 'outside' : 'inside');
+        this.elements.location.text.textContent = isOutside ? 'Outside' : 'Inside';
+    }
+
+    // Update weapon slot
+    updateWeapon(slot, weapon) {
+        const weaponSlot = this.elements.weapons[slot];
+        if (!weaponSlot.container || !weaponSlot.icon || !weaponSlot.name) return;
+
+        if (!weapon || !weapon.name) {
+            weaponSlot.container.classList.add('empty');
+            weaponSlot.name.textContent = 'Empty';
+            return;
+        }
+
+        weaponSlot.container.classList.remove('empty');
+        weaponSlot.name.textContent = weapon.name;
+
+        if (weapon.texture) {
+            const texture = this.spriteManager.getWeaponTexture(weapon.texture);
+            const style = this.spriteManager.getSpriteStyle(texture);
+
+            Object.assign(weaponSlot.icon.style, style);
+        }
+    }
+
+    // Show toast notification
+    showToast(message, icon, className = '') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${className}`;
+        toast.textContent = message;
+
+        if (icon) {
+            const iconElement = document.createElement('div');
+            iconElement.className = 'icon';
+            Object.assign(iconElement.style, this.spriteManager.getSpriteStyle(icon));
+            toast.prepend(iconElement);
+        }
+
+        this.elements.toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, config.toastDuration);
+    }
+}
+
 // Main HUD class that coordinates all components
 // Manages state, UI updates, and WebSocket communication
 class HUD {
@@ -155,6 +380,7 @@ class HUD {
         this.stateManager = new StateManager();
         this.uiManager = new UIManager();
         this.wsManager = new WebSocketManager(this.handleEvent.bind(this));
+        this.talkingHeadManager = new TalkingHeadManager();
     }
 
     // Initialize the HUD
@@ -172,6 +398,9 @@ class HUD {
 
         // Connect to WebSocket
         this.wsManager.connect();
+
+        // Initialize talking head
+        this.talkingHeadManager.initialize();
     }
 
     // Handle incoming events from WebSocket

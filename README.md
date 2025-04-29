@@ -22,6 +22,25 @@ This project consists of three main components:
 - Cross-platform support (Windows/WSL)
 - Configurable event tracking and logging
 
+## Talking Head Overlay
+
+The system includes an advanced image processing module that creates a dynamic talking head overlay for streamers. This feature:
+
+1. **Face Capture**: Automatically captures and crops the player's face from the character screen
+2. **Sprite Sheet Generation**: Creates a 2x2 grid sprite sheet with different facial expressions:
+   - Neutral expression
+   - Light talking
+   - Shouting
+   - Raised eyebrow/smirk
+3. **DALL-E Integration**: Uses AI to generate pixel art-style talking head sprites
+4. **Dynamic Animation**: Animates the talking head based on chat activity and message intensity
+
+The image processing module (`image_processor.py`) handles:
+- Automatic face detection and cropping
+- Sprite sheet creation and management
+- AI-powered sprite generation
+- Expression mapping to chat events
+
 ## Setup Instructions
 
 ### 1. Install the Lua Mod

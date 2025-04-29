@@ -1,41 +1,23 @@
-Prompt (Final Version):
-
-Create a pixel art sprite sheet for a talking head avatar inspired by 1990s first-person shooter games.
-
-Input: I will provide a source character image (face).
-
-Output Requirements:
-
-Style: Pixel art, chunky 16–32 pixel blockiness.
-
-Canvas size: 768px wide x 768px tall overall.
-
-Frame layout: 2 rows by 2 columns (4 frames total).
-
-Each frame: 384px wide x 384px tall.
-
+Create a pixel art sprite sheet for a talking head avatar inspired by 1990s FPS games.
+Input: I will provide a character face image.
+Output: Pixel art with chunky 16–32 pixel blockiness.
+Canvas size: 768×768px.
+Layout: 2 rows × 2 columns (4 frames total).
+Each frame: 384×384px.
 Background: Fully transparent (no color fill).
+Character Position: Centered in each frame, showing face and shoulders.
+Frames:
 
-Character Position: Centered in each frame with clear face and shoulders.
+Neutral (mouth closed)
 
-Facial Expressions per frame:
+Light talking (small mouth open)
 
-Neutral expression (mouth closed)
+Shouting (wide mouth open)
 
-Small mouth open (light talking)
+Smirk or raised eyebrow
 
-Wide mouth open (shouting)
-
-Raised eyebrow / smirk (optional mood frame)
-
-Consistent lighting: Front-lit face.
-
-Maintain camera angle consistency (no tilting or skewing across frames).
-
-Visual Style:
-
-Inspired by classic Doom Guy status bar sprites.
-
-Limited color palette (~16 colors).
-
-Bold shading, sharp pixel outlines, no blurring.
+Lighting: Consistent front-lit face.
+Visual Style: Classic Doom Guy vibe, ~16 color palette, bold shading, sharp pixel outlines, no blurring.
+Camera Angle: Consistent — no tilts or skewing.
+Orientation: All frames must face the same direction — no horizontal flipping.
+Alignment: All sprites must be pixel-perfectly aligned. The top of the head, shoulder height, and face position must be identical in every frame. This is a sprite sheet for animation — alignment must be exact.

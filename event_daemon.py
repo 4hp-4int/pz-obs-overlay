@@ -11,6 +11,7 @@ from typing import Dict, Any, Optional, Set
 from loguru import logger
 from image_processor import ImageProcessor
 from dotenv import load_dotenv
+import shutil
 
 load_dotenv()
 
@@ -264,6 +265,11 @@ class EventDaemon:
                                                     face_image=Path(cropped_path)
                                                 ):
                                                     logger.info("Created new DALL-E generated sprite sheet")
+                                                    # Broadcast that a new sprite sheet is available
+                                                    await self.broadcast(json.dumps({
+                                                        "type": "sprite_sheet_updated",
+                                                        "path": str(sprite_sheet_path)
+                                                    }))
                                     except json.JSONDecodeError as e:
                                         if self.verbose:
                                             logger.error(f"Error parsing screen position JSON: {e}")
